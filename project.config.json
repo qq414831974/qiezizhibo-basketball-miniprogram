@@ -1,0 +1,13 @@
+{
+  "miniprogramRoot": "./dist",
+  "projectname": "qiezizhibo-basketball-miniprogram",
+  "description": "qiezizhibo-basketball-miniprogram",
+  "appid": "wxfc7c76a0048dca55",
+  "setting": {
+    "urlCheck": true,
+    "es6": false,
+    "postcss": false,
+    "minified": false
+  },
+  "compileType": "miniprogram"
+}
