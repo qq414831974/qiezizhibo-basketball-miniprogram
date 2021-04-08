@@ -63,7 +63,7 @@ $color-bg-light: #ECF5FD !default;
 $color-bg-lighter: tint($color-bg-light, 50%) !default;
 $color-bg-grey: #F7F7F7 !default;
 $color-bg-grey-dark: #F0F0F0 !default;
-$color-bg-blue-main: #2d8cf0 !default;
+$color-bg-orange-main: #ff9900 !default;
 
 /* 边框颜色 */
 $color-border-base: #C5D9E8 !default;
@@ -483,7 +483,7 @@ $at-timeline-line-color: $color-border-lighter !default;
   }
 
   .at-tabs__header:not(scroll-view) {
-    background-color: $color-bg-blue-main;
+    background-color: $color-bg-orange-main;
     line-height: $line-height-en;
 
     .at-tabs__item {

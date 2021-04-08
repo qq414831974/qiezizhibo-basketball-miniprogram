@@ -76,7 +76,7 @@ class BetRank extends Component<PageOwnProps, PageState> {
                                 {item.user && item.user.name ? item.user.name : "匿名"}
                               </View>
                               <View className='item-content__info-note'>
-                                总花费{item.price ? getYuan(item.price) : 0}茄币
+                                总花费{item.price ? getYuan(item.price) : 0}绝杀币
                               </View>
                             </View>
                           </View>

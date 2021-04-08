@@ -1,11 +1,10 @@
 import "taro-ui/dist/style/components/article.scss";
 import Taro, {Component} from '@tarojs/taro'
-import {AtAvatar} from "taro-ui"
 import {connect} from '@tarojs/redux'
 import {View, Text, Image} from '@tarojs/components'
 import defaultLogo from '../../assets/default-logo.png'
 import './index.scss'
-import {formatTime, formatDayTime} from "../../utils/utils";
+import {formatTime, formatDayTime, formatMonthDay} from "../../utils/utils";
 
 const eventType: { [key: number]: { text: string, color: string }; } = {}
 eventType[-1] = {text: "未开始", color: "unopen"};
@@ -63,12 +62,14 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
       return <View/>
     }
     // matchInfo.isBetEnable = true
+    const againstTeam = matchInfo.againstTeams != null && Object.keys(matchInfo.againstTeams).length == 1 ? matchInfo.againstTeams[Object.keys(matchInfo.againstTeams)[0]] : null;
     return (
       <View className={`qz-match-item ${matchInfo.isBetEnable && showBet ? "qz-match-item-big" : ""} ${className}`}
             onClick={this.onItemClick}>
-        {matchInfo.hostTeam != null && matchInfo.guestTeam != null ?
-          <View className={`qz-match-item-content ${matchInfo.isBetEnable && showBet? "qz-match-item-content-big" : ""}`}>
-            {((matchInfo.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status < 21 && matchInfo.isLiveCharge)) && payEnabled && showCharge ?
+        {matchInfo.againstTeams != null && Object.keys(matchInfo.againstTeams).length == 1 ?
+          (<View
+            className={`qz-match-item-content ${matchInfo.isBetEnable && showBet ? "qz-match-item-content-big" : ""}`}>
+            {((matchInfo.status && matchInfo.status.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status && matchInfo.status.status < 21 && matchInfo.isLiveCharge)) && payEnabled && showCharge ?
               <View className="qz-match-item__charge">
                 {matchInfo.isMonopoly ?
                   (matchInfo.monopolyUser ?
@@ -92,11 +93,12 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
               : null}
             <View className='qz-match-item__team'>
               <View className="qz-match-item__team-avatar">
-                <Image src={matchInfo.hostTeam && matchInfo.hostTeam.headImg ? matchInfo.hostTeam.headImg : defaultLogo}/>
+                <Image
+                  src={againstTeam.hostTeam && againstTeam.hostTeam.headImg ? againstTeam.hostTeam.headImg : defaultLogo}/>
               </View>
               <Text
                 className="qz-match-item__team-name">
-                {matchInfo.hostTeam ? matchInfo.hostTeam.name : ""}
+                {againstTeam.hostTeam ? againstTeam.hostTeam.name : ""}
               </Text>
             </View>
             <View className='qz-match-item__vs'>
@@ -110,25 +112,20 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
                     {matchInfo.round}
                   </Text> : <View/>}
                 <Text
-                  className={matchInfo.penaltyScore ? "qz-match-item__vs-match-score qz-match-item__vs-match-score-small" : "qz-match-item__vs-match-score"}>
-                  {matchInfo.status == -1 ? "VS" : matchInfo.score}
+                  className="qz-match-item__vs-match-score">
+                  {matchInfo.status && matchInfo.status.status == -1 ? "VS" : (matchInfo.status ? matchInfo.status.score[Object.keys(matchInfo.againstTeams)[0]] : "0-0")}
                 </Text>
-                {matchInfo.penaltyScore ?
-                  <Text className="qz-match-item__vs-match-score-penalty">
-                    {`点球:${matchInfo.penaltyScore}`}
-                  </Text> : null
-                }
                 <View className="qz-match-item__vs-match-status">
                   <View className="status-box">
                     <View
-                      className={`background ${matchInfo.activityId == null || !matchInfo.available ? "" : eventType[matchInfo.status].color}`}>
+                      className={`background ${matchInfo.activityId == null || !matchInfo.available ? "" : eventType[matchInfo.status.status].color}`}>
                       <Text className={matchInfo.activityId == null || !matchInfo.available ? "text-disabled" : "text"}>
-                        {eventType[matchInfo.status].text}
+                        {eventType[matchInfo.status.status].text}
                       </Text>
                       <View
-                        className={`status-icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status].color}`}>
+                        className={`status-icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status.status].color}`}>
                         <View
-                          className={`icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status].color}`}/>
+                          className={`icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status.status].color}`}/>
                       </View>
                     </View>
                   </View>
@@ -140,50 +137,152 @@ class MatchItem extends Component<PageOwnProps | any, PageState> {
             </View>
             <View className='qz-match-item__team'>
               <View className="qz-match-item__team-avatar">
-                <Image src={matchInfo.guestTeam && matchInfo.guestTeam.headImg ? matchInfo.guestTeam.headImg : defaultLogo}/>
+                <Image
+                  src={againstTeam.guestTeam && againstTeam.guestTeam.headImg ? againstTeam.guestTeam.headImg : defaultLogo}/>
               </View>
               <Text
                 className="qz-match-item__team-name">
-                {matchInfo.guestTeam ? matchInfo.guestTeam.name : ""}
+                {againstTeam.guestTeam ? againstTeam.guestTeam.name : ""}
               </Text>
             </View>
-          </View>
-          :
-          <View className="qz-match-item-content">
-            <View className='qz-match-item__vs qz-match-item__vs-full'>
-              <View className='qz-match-item__vs-content'>
-                {matchInfo.league != null ?
-                  <Text className="qz-match-item__vs-league-name">
-                    {matchInfo.league.shortName ? matchInfo.league.shortName : matchInfo.league.name}
-                  </Text> : <View/>}
-                {matchInfo.round != null && showRound ?
-                  <Text className="qz-match-item__vs-match-round">
-                    {matchInfo.round}
-                  </Text> : <View/>}
-                <Text className="qz-match-item__vs-match-name">
-                  {matchInfo.name}
-                </Text>
-                <View className="qz-match-item__vs-match-status">
-                  <View className="status-box">
-                    <View
-                      className={`background ${matchInfo.activityId == null || !matchInfo.available ? "" : eventType[matchInfo.status].color}`}>
-                      <Text className={matchInfo.activityId == null || !matchInfo.available ? "text-disabled" : "text"}>
-                        {eventType[matchInfo.status].text}
-                      </Text>
-                      <View
-                        className={`status-icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status].color}`}>
+          </View>)
+          : (
+            matchInfo.againstTeams != null && Object.keys(matchInfo.againstTeams).length > 1 ?
+              (<View
+                className={`qz-match-item-content ${matchInfo.isBetEnable && showBet ? "qz-match-item-content-big" : ""}`}>
+                {((matchInfo.status && matchInfo.status.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status && matchInfo.status.status < 21 && matchInfo.isLiveCharge)) && payEnabled && showCharge ?
+                  <View className="qz-match-item__charge">
+                    {matchInfo.isMonopoly ?
+                      (matchInfo.monopolyUser ?
+                          <View className="qz-match-item__charge-user">
+                            <Image className='avatar'
+                                   src={matchInfo.monopolyUser.avatar ? matchInfo.monopolyUser.avatar : defaultLogo}/>
+                            {matchInfo.monopolyUser.name}
+                            请大家围观
+                          </View>
+                          : "匿名用户请大家围观"
+                      ) : (matchInfo.chargeTimes ? `付费 ${matchInfo.chargeTimes}人已观看` : "付费")}
+                  </View>
+                  : null
+                }
+                {matchInfo.isBetEnable && showBet ?
+                  <View className="qz-match-item-top-skewed" onClick={this.onBetClick}>
+                    <View className="qz-match-item-top-skewed-center-text">
+                      比分竞猜
+                    </View>
+                  </View>
+                  : null}
+                <View className='qz-match-item__vs-against'>
+                  <View className='qz-match-item__vs-against-content'>
+                    {matchInfo.league != null ?
+                      <View>
+                        <Image className="qz-match-item__vs-against-league-img"
+                               src={matchInfo.league && matchInfo.league.headImg ? matchInfo.league.headImg : defaultLogo}/>
+                        <Text className="qz-match-item__vs-against-league-name">
+                          {matchInfo.league.shortName ? matchInfo.league.shortName : matchInfo.league.name}
+                        </Text>
+                      </View> : <View/>}
+                    {matchInfo.round != null && showRound ?
+                      <Text className="qz-match-item__vs-against-match-round">
+                        {matchInfo.round}
+                      </Text> : <View/>}
+                    {onlytime ? null : <Text className="qz-match-item__vs-against-match-time">
+                      {formatMonthDay(new Date(matchInfo.startTime))}
+                    </Text>}
+                    <Text className="qz-match-item__vs-against-match-time">
+                      {formatDayTime(new Date(matchInfo.startTime))}
+                    </Text>
+                    <View className="qz-match-item__vs-against-match-status">
+                      <View className="status-box">
                         <View
-                          className={`icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status].color}`}/>
+                          className={`background ${matchInfo.activityId == null || !matchInfo.available ? "" : eventType[matchInfo.status.status].color}`}>
+                          <Text
+                            className={matchInfo.activityId == null || !matchInfo.available ? "text-disabled" : "text"}>
+                            {eventType[matchInfo.status.status].text}
+                          </Text>
+                          <View
+                            className={`status-icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status.status].color}`}>
+                            <View
+                              className={`icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status.status].color}`}/>
+                          </View>
+                        </View>
                       </View>
                     </View>
                   </View>
+                  <View className='qz-match-item__vs-against-divider'>
+                  </View>
                 </View>
-                <Text className="qz-match-item__vs-match-time">
-                  {onlytime ? formatDayTime(new Date(matchInfo.startTime)) : formatTime(new Date(matchInfo.startTime))}
-                </Text>
+                <View className='qz-match-item-against__teams'>
+                  {
+                    matchInfo.againstTeams && Object.keys(matchInfo.againstTeams).map((key: any) => {
+                      return <View key={`against-${key}`} className='qz-match-item-against__team-against'>
+                        <View className="qz-match-item-against__team">
+                          <View className="qz-match-item-against__team-avatar">
+                            <Image
+                              src={matchInfo.againstTeams[key].hostTeam && matchInfo.againstTeams[key].hostTeam.headImg ? matchInfo.againstTeams[key].hostTeam.headImg : defaultLogo}/>
+                          </View>
+                          <Text
+                            className="qz-match-item-against__team-name">
+                            {matchInfo.againstTeams[key].hostTeam ? matchInfo.againstTeams[key].hostTeam.name : ""}
+                          </Text>
+                        </View>
+                        <Text
+                          className="qz-match-item-against__score">
+                          {matchInfo.status && matchInfo.status.status == -1 ? "VS" : (matchInfo.status ? matchInfo.status.score[key] : "0-0")}
+                        </Text>
+                        <View className="qz-match-item-against__team">
+                          <View className="qz-match-item-against__team-avatar">
+                            <Image
+                              src={matchInfo.againstTeams[key].guestTeam && matchInfo.againstTeams[key].guestTeam.headImg ? matchInfo.againstTeams[key].guestTeam.headImg : defaultLogo}/>
+                          </View>
+                          <Text
+                            className="qz-match-item-against__team-name">
+                            {matchInfo.againstTeams[key].guestTeam ? matchInfo.againstTeams[key].guestTeam.name : ""}
+                          </Text>
+                        </View>
+                      </View>
+                    })
+                  }
+                </View>
+              </View>)
+              :
+              <View className="qz-match-item-content">
+                <View className='qz-match-item__vs qz-match-item__vs-full'>
+                  <View className='qz-match-item__vs-content'>
+                    {matchInfo.league != null ?
+                      <Text className="qz-match-item__vs-league-name">
+                        {matchInfo.league.shortName ? matchInfo.league.shortName : matchInfo.league.name}
+                      </Text> : <View/>}
+                    {matchInfo.round != null && showRound ?
+                      <Text className="qz-match-item__vs-match-round">
+                        {matchInfo.round}
+                      </Text> : <View/>}
+                    <Text className="qz-match-item__vs-match-name">
+                      {matchInfo.name}
+                    </Text>
+                    <View className="qz-match-item__vs-match-status">
+                      <View className="status-box">
+                        <View
+                          className={`background ${matchInfo.activityId == null || !matchInfo.available ? "" : eventType[matchInfo.status.status].color}`}>
+                          <Text
+                            className={matchInfo.activityId == null || !matchInfo.available ? "text-disabled" : "text"}>
+                            {eventType[matchInfo.status.status].text}
+                          </Text>
+                          <View
+                            className={`status-icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status.status].color}`}>
+                            <View
+                              className={`icon ${matchInfo.activityId == null || !matchInfo.available ? "none" : eventType[matchInfo.status.status].color}`}/>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                    <Text className="qz-match-item__vs-match-time">
+                      {onlytime ? formatDayTime(new Date(matchInfo.startTime)) : formatTime(new Date(matchInfo.startTime))}
+                    </Text>
+                  </View>
+                </View>
               </View>
-            </View>
-          </View>}
+          )}
       </View>
     )
   }

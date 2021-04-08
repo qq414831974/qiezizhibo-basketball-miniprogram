@@ -50,7 +50,7 @@
         height: 0;
         border-width: 20px;
         border-style: solid;
-        border-color: $color-bg-blue-main transparent transparent transparent;
+        border-color: $color-bg-orange-main transparent transparent transparent;
         position: absolute;
         left: calc(90px + 3vw);
       }
@@ -67,7 +67,7 @@
         height: 0;
         border-width: 20px;
         border-style: solid;
-        border-color: $color-bg-blue-main transparent transparent transparent;
+        border-color: $color-bg-orange-main transparent transparent transparent;
         position: absolute;
         right: calc(90px + 3vw);
       }
@@ -138,7 +138,7 @@
 
   &__chat-text {
     &__text {
-      background-color: $color-bg-blue-main;
+      background-color: $color-bg-orange-main;
       border-radius: 15px;
       padding: 15px;
       word-wrap: break-word;
@@ -173,7 +173,7 @@
     &-button {
       width: 100%;
       height: 100%;
-      color: $color-bg-blue-main;
+      color: $color-bg-orange-main;
       font-size: $font-size-base;
       display: flex !important;
       align-items: center;

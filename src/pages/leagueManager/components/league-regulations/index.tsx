@@ -8,6 +8,13 @@ import './index.scss'
 import logo from "../../../../assets/default-logo.png";
 import {formatDate} from "../../../../utils/utils";
 
+
+const ruleType = {
+  1: "小篮球赛",
+  2: "1 x 1",
+  3: "3 x 3",
+  4: "5 x 5",
+}
 type PageStateProps = {
   report?: any;
 }
@@ -45,7 +52,7 @@ class LeagueRegulations extends Component<PageOwnProps | any, PageState> {
    */
   config: Config = {
     navigationBarTitleText: '绝杀时刻',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
   }
 
@@ -174,11 +181,11 @@ class LeagueRegulations extends Component<PageOwnProps | any, PageState> {
             <View
               className='at-col at-col-8 at-col__offset-1 at-col--wrap qz-league-regulations__info-content'>{leagueMatch.type == 1 ? "杯赛" : "联赛"}</View>
           </View>
-          {leagueMatch.regulations && leagueMatch.regulations.population && leagueMatch.regulations.population != 0 ?
+          {leagueMatch.ruleType != null ?
             <View className='at-row qz-league-regulations__info-container'>
               <View className='at-col at-col-2 at-col__offset-1 qz-league-regulations__info-title'>赛制</View>
               <View
-                className='at-col at-col-8 at-col__offset-1 at-col--wrap qz-league-regulations__info-content'>{leagueMatch.regulations.population}人制</View>
+                className='at-col at-col-8 at-col__offset-1 at-col--wrap qz-league-regulations__info-content'>{ruleType[leagueMatch.ruleType]}</View>
             </View> : null}
           {leagueMatch.place && leagueMatch.place.length > 0 ?
             <View className='at-row qz-league-regulations__info-container'>

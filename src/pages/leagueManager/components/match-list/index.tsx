@@ -39,7 +39,7 @@ class MatchList extends Component<PageOwnProps, PageState> {
    */
   config: Config = {
     navigationBarTitleText: '比赛',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
   }
 

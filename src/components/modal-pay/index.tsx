@@ -93,7 +93,7 @@ class ModalPay extends Component<PageOwnProps | any, PageState> {
     }
     if (!this.state.loading && (this.props.deposit == null || this.props.deposit == 0 || this.props.deposit < this.props.price)) {
       Taro.showToast({
-        title: "茄币不足，请选择其他方式支付",
+        title: "绝杀币不足，请选择其他方式支付",
         icon: 'none',
       })
       return;
@@ -139,11 +139,11 @@ class ModalPay extends Component<PageOwnProps | any, PageState> {
                         image={eggplantcoin}/>
                     </View>
                     <View className="qz-payment-modal-choice-text">
-                      茄币余额:{this.state.loading ? "获取中" : getYuan(this.props.deposit)}
+                      绝杀币余额:{this.state.loading ? "获取中" : getYuan(this.props.deposit)}
                     </View>
                     {!this.state.loading && (this.props.deposit == 0 || this.props.deposit < this.props.price) ?
                       <View className="qz-payment-modal-choice-hint">
-                        茄币不足
+                        绝杀币不足
                       </View> : null}
                   </View>
                 </View>

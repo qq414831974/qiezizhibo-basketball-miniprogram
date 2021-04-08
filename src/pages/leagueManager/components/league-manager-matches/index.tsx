@@ -42,7 +42,7 @@ class LeagueManagerMatches extends Component<PageOwnProps | any, PageState> {
    */
   config: Config = {
     navigationBarTitleText: '绝杀时刻',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
   }
 

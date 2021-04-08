@@ -25,7 +25,7 @@
 .qz-home-content-bg {
   width: 100vw;
   height: 40vw;
-  background-color: $color-bg-blue-main;
+  background-color: $color-bg-orange-main;
   display: flex;
   justify-content: center;
 
@@ -38,7 +38,7 @@
 }
 
 .qz-home-content-bg-bottom {
-  background-color: $color-bg-blue-main;
+  background-color: $color-bg-orange-main;
   width: 100vw;
   height: 10vw;
   border-radius: 0 0 50% 50%;
@@ -95,13 +95,13 @@
 }
 
 .qz-home-navigation-bar__right-search-bar {
-  background-color: $color-bg-blue-main;
+  background-color: $color-bg-orange-main;
 
   .at-search-bar {
-    background-color: $color-bg-blue-main;
+    background-color: $color-bg-orange-main;
 
     &__action {
-      background-color: $color-bg-blue-main;
+      background-color: $color-bg-orange-main;
     }
   }
 }
@@ -123,7 +123,7 @@
     &-count {
       font-size: $font-size-base;
       color: $color-text-base-inverse;
-      background-color: $color-bg-blue-main;
+      background-color: $color-bg-orange-main;
       padding: 0 $spacing-h-sm;
       margin-left: $spacing-h-lg;
     }
@@ -245,7 +245,7 @@
     &-count {
       font-size: $font-size-base;
       color: $color-text-base-inverse;
-      background-color: $color-bg-blue-main;
+      background-color: $color-bg-orange-main;
       padding: 0 $spacing-h-sm;
       margin-left: $spacing-h-lg;
     }

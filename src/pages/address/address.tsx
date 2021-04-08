@@ -39,7 +39,7 @@ class Address extends Component<PageOwnProps | any, PageState> {
    */
   config: Config = {
     navigationBarTitleText: '我的地址',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
   }
 

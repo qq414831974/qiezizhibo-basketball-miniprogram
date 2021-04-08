@@ -193,7 +193,7 @@ class Bet extends Component<PageOwnProps, PageState> {
    */
   config: Config = {
     navigationBarTitleText: '比分竞猜',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
   }
 

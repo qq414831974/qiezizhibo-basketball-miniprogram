@@ -12,7 +12,6 @@ import * as api from '../../constants/api'
 import './live.scss'
 import matchAction from "../../actions/match";
 import liveAction from "../../actions/live";
-import playerAction from "../../actions/player";
 import payAction from "../../actions/pay";
 import depositAction from "../../actions/deposit";
 import {
@@ -46,7 +45,6 @@ import moment from '../../assets/live/moment.png'
 import headphones from '../../assets/live/headphones.png'
 import views_icon from '../../assets/live/views_icon.png'
 import withShare from "../../utils/withShare";
-import TimeLine from "./components/time-line";
 import Statistics from "./components/statistics";
 import LineUp from "./components/line-up";
 import ChattingRoom from "./components/chatting-room";
@@ -64,16 +62,6 @@ import HeatPlayer from "../../components/heat-player";
 import HeatLeagueTeam from "../../components/heat-league-team";
 import ShareMoment from "../../components/share-moment";
 import ModalPay from "../../components/modal-pay";
-import {
-  redcard,
-  yellowcard,
-  change,
-  goal,
-  owngoal,
-  shoot,
-  substitutionLeft,
-  substitutionRight
-} from '../../utils/assets';
 import MatchClip from "./components/match-clip";
 
 type Bulletin = {
@@ -126,7 +114,6 @@ type PageState = {
   rightNooice: number;
   nooiceEnabled: boolean;
   isCollect: boolean;
-  playerLoading: boolean;
   chatLoading: boolean;
   commentIntoView: any;
   loginOpen: boolean;
@@ -205,15 +192,6 @@ enum LiveStatus {
   LOADING,//加载中
 }
 
-const eventType = {
-  1: {text: "进球", icon: goal},
-  2: {text: "射门", icon: shoot},
-  7: {text: "黄牌", icon: yellowcard},
-  8: {text: "红牌", icon: redcard},
-  10: {text: "换人", icon: change, secondIcon: {left: substitutionLeft, right: substitutionRight}},
-  22: {text: "乌龙球", icon: owngoal},
-};
-
 @withShare({})
 class Live extends Component<PageOwnProps, PageState> {
 
@@ -237,7 +215,7 @@ class Live extends Component<PageOwnProps, PageState> {
 
   config: Config = {
     navigationBarTitleText: '绝杀时刻',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
   }
 
@@ -261,7 +239,6 @@ class Live extends Component<PageOwnProps, PageState> {
       rightNooice: 0,
       nooiceEnabled: true,
       isCollect: false,
-      playerLoading: false,
       chatLoading: false,
       commentIntoView: null,
       loginOpen: false,
@@ -394,7 +371,7 @@ class Live extends Component<PageOwnProps, PageState> {
         if (data.leagueId) {
           this.setState({leagueId: data.leagueId});
         }
-        if (data.status == FootballEventType.FINISH) {
+        if (data.status && data.status.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
           this.startTimer_Danmu();
           this.getMatchDanmu(data.id, this.state.currentMedia);
@@ -411,7 +388,6 @@ class Live extends Component<PageOwnProps, PageState> {
         this.startTimer_CountDown();
         this.getCollection(data.id);
         this.initSocket(data.id);
-        data.hostTeamId && this.getTeamPlayer(data.id, data.hostTeamId);
         this.getUserChargeInfo(data, true);
         this.getSharePicture(data);
         this.enterTime = formatTimeSecond(new Date());
@@ -568,7 +544,7 @@ class Live extends Component<PageOwnProps, PageState> {
             // context.setState({broadcastList: broadcastList})
             context.getCommentList(context.props.match.id);
           } else {
-            if (context.props.matchStatus.status < FootballEventType.FINISH) {
+            if (context.props.match.status && context.props.match.status.status < FootballEventType.FINISH) {
               context.sendLiveDanmu({text: comment.content, id: comment.id, user: comment.user});
             } else {
               context.getMatchDanmu(context.props.match.id, context.state.currentMedia);
@@ -602,7 +578,8 @@ class Live extends Component<PageOwnProps, PageState> {
         return;
       }
       let params: any = {content: message, userNo: this.props.userInfo.userNo, token: token};
-      if (this.props.matchStatus.status == FootballEventType.FINISH) {
+      const {match} = this.props;
+      if (match.status && match.status.status == FootballEventType.FINISH) {
         params = {
           content: message,
           userNo: this.props.userInfo.userNo,
@@ -694,11 +671,11 @@ class Live extends Component<PageOwnProps, PageState> {
       this.getParamId() && this.getMatchInfo(this.getParamId()).then((data) => {
         this.setUpNooice(data);
         this.getUserChargeInfo(data, false);
-        if (match && match.status != FootballEventType.FINISH && data.status == FootballEventType.FINISH) {
+        if (match.status && match.status.status != FootballEventType.FINISH && data.status.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
           this.getMatchDanmu(data.id, this.state.currentMedia);
         } else {
-          if (match && match.status != FootballEventType.FINISH) {
+          if (match.status && match.status.status != FootballEventType.FINISH) {
             this.getLiveInfo(data.activityId);
           }
         }
@@ -804,7 +781,7 @@ class Live extends Component<PageOwnProps, PageState> {
         this.setState({needGiftLive: res.needGiftLive})
         let needPayRecord = res.needPayRecord;
         let needPayLive = res.needPayLive;
-        if (match.status == FootballEventType.FINISH) {
+        if (match.status && match.status.status == FootballEventType.FINISH) {
           if ((match.isRecordCharge && needPayRecord)) {
             this.setState({needPay: true})
           } else {
@@ -818,9 +795,9 @@ class Live extends Component<PageOwnProps, PageState> {
           }
         }
         if (showPay) {
-          if (match.status == FootballEventType.FINISH && match.isRecordCharge && needPayRecord) {
+          if (match.status && match.status.status == FootballEventType.FINISH && match.isRecordCharge && needPayRecord) {
             this.showPay(this.getCharge(match, false))
-          } else if (match.status != FootballEventType.FINISH && match.isLiveCharge && needPayLive) {
+          } else if (match.status && match.status.status != FootballEventType.FINISH && match.isLiveCharge && needPayLive) {
             this.showPay(this.getCharge(match, false))
           }
         }
@@ -1043,15 +1020,9 @@ class Live extends Component<PageOwnProps, PageState> {
       });
     }
   }
-  getTeamPlayer = (_matchId, teamId) => {
-    this.setState({playerLoading: true})
-    playerAction.getPlayerList({pageNum: 1, pageSize: 100, teamId: teamId}).then(() => {
-      this.setState({playerLoading: false})
-    })
-  }
   getPlayPath = (match) => {
-    if (match.status < FootballEventType.FINISH) {
-      if (!match.playPath.startsWith('http')) {
+    if (match.status && match.status.status < FootballEventType.FINISH) {
+      if (match.playPath && !match.playPath.startsWith('http')) {
         return "https://" + match.playPath;
       } else {
         return match.playPath;
@@ -1086,17 +1057,17 @@ class Live extends Component<PageOwnProps, PageState> {
   getLiveStatus = () => {
     const {match = null} = this.props;
     let status = LiveStatus.ENABLED;
-    if (match) {
-      if (match.status == FootballEventType.FINISH) {
+    if (match && match.status) {
+      if (match.status.status == FootballEventType.FINISH) {
         status = LiveStatus.FINISH;
       } else {
         if (this.state.liveLoading && !this.state.liveLoaded) {
           status = LiveStatus.LOADING;
-        } else if (this.state.diffDayTime != null && match.status == FootballEventType.UNOPEN && !this.state.ping.isPushing) {
+        } else if (this.state.diffDayTime != null && match.status.status == FootballEventType.UNOPEN && !this.state.ping.isPushing) {
           status = LiveStatus.UNOPEN;
-        } else if (this.state.diffDayTime == null && match.status == FootballEventType.UNOPEN && !this.state.ping.isPushing) {
+        } else if (this.state.diffDayTime == null && match.status.status == FootballEventType.UNOPEN && !this.state.ping.isPushing) {
           status = LiveStatus.ONTIME;
-        } else if (this.state.diffDayTime == null && match.status > FootballEventType.UNOPEN && !this.state.ping.isPushing) {
+        } else if (this.state.diffDayTime == null && match.status.status > FootballEventType.UNOPEN && !this.state.ping.isPushing) {
           status = LiveStatus.NOTPUSH;
         } else {
           status = LiveStatus.ENABLED;
@@ -1180,8 +1151,21 @@ class Live extends Component<PageOwnProps, PageState> {
       return date1 > date2 ? 1 : (date1 == date2 ? 0 : -1)
     });
   }
-  setUpNooice = (status) => {
-    this.setState({leftNooice: status.hostNooice, rightNooice: status.guestNooice})
+  setUpNooice = (match) => {
+    const againstTeams = match.againstTeams;
+    const againstTeamsNooice = match.againstTeamsNooice;
+    const matchStatus = match.status;
+    if (againstTeams && matchStatus && againstTeamsNooice) {
+      let hostNooice = 0;
+      let guestNooice = 0;
+      if (againstTeamsNooice[matchStatus.againstIndex]) {
+        hostNooice = againstTeamsNooice[matchStatus.againstIndex].hostNooice ? againstTeamsNooice[matchStatus.againstIndex].hostNooice : 0;
+        guestNooice = againstTeamsNooice[matchStatus.againstIndex].guestNooice ? againstTeamsNooice[matchStatus.againstIndex].guestNooice : 0;
+      }
+      this.setState({leftNooice: hostNooice, rightNooice: guestNooice})
+    } else {
+      this.setState({leftNooice: 0, rightNooice: 0})
+    }
   }
 
   isThisYear = (date: Date) => {
@@ -1212,8 +1196,8 @@ class Live extends Component<PageOwnProps, PageState> {
       Taro.navigateTo({url: `../leagueManager/leagueManager?id=${item.id}`});
     }
   }
-  addNooice = (teamId) => {
-    matchAction.addMatchNooice({matchId: this.props.match.id, teamId: teamId})
+  addNooice = (againstIndex, teamId) => {
+    matchAction.addMatchNooice({matchId: this.props.match.id, againstIndex: againstIndex, teamId: teamId})
   }
   handleLeftNooice = async () => {
     // if (!this.state.nooiceEnabled) {
@@ -1231,7 +1215,8 @@ class Live extends Component<PageOwnProps, PageState> {
         leftNooice: this.state.leftNooice + 1,
         nooiceEnabled: true
       });
-      this.props.match && this.props.match.hostTeam && this.addNooice(this.props.match.hostTeam.id)
+      const {againstIndex, againstTeam} = this.getCurrentAgainstTeam();
+      againstTeam && againstTeam.hostTeam && this.addNooice(againstIndex, againstTeam.hostTeam.id)
     }, 1000);
   }
   handleRightNooice = async () => {
@@ -1250,7 +1235,8 @@ class Live extends Component<PageOwnProps, PageState> {
         rightNooice: this.state.rightNooice + 1,
         nooiceEnabled: true
       });
-      this.props.match && this.props.match.guestTeam && this.addNooice(this.props.match.guestTeam.id)
+      const {againstIndex, againstTeam} = this.getCurrentAgainstTeam();
+      againstTeam && againstTeam.guestTeam && this.addNooice(againstIndex, againstTeam.guestTeam.id)
     }, 1000);
   }
   onCollectClick = async () => {
@@ -1278,13 +1264,6 @@ class Live extends Component<PageOwnProps, PageState> {
     }, () => {
       Taro.showToast({title: "收藏失败", icon: "none"});
     });
-  }
-  switchTeamPlayer = (tab) => {
-    if (tab == 0) {
-      this.props.match.hostTeamId && this.getTeamPlayer(this.props.match.id, this.props.match.hostTeamId)
-    } else {
-      this.props.match.guestTeamId && this.getTeamPlayer(this.props.match.id, this.props.match.guestTeamId)
-    }
   }
 
   showAuth = () => {
@@ -1498,13 +1477,12 @@ class Live extends Component<PageOwnProps, PageState> {
         } else {
           this.setState({needPay: false})
           this.getUserChargeInfo(this.props.match, false);
-          this.getParamId() && this.getMatchStatus(this.getParamId());
         }
       }
     });
   }
   getCharge = (data, monopolyOnly): MatchCharge => {
-    if (data.status == FootballEventType.FINISH) {
+    if (data.status && data.status.status == FootballEventType.FINISH) {
       return {
         price: data.recordPrice,
         type: ORDER_TYPE.record,
@@ -1554,7 +1532,7 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   bindPlayEnd = () => {
     const match = this.props.match;
-    if (match.status < FootballEventType.FINISH) {
+    if (match.status && match.status.status < FootballEventType.FINISH) {
       return;
     } else {
       if (this.props.mediaList && this.props.mediaList.length > 0) {
@@ -1582,7 +1560,7 @@ class Live extends Component<PageOwnProps, PageState> {
     if (!await this.isUserLogin()) {
       this.clearTimer_playCountDown();
       const timeoutID_playCountDown = setTimeout(async () => {
-        if (this.props.match && this.props.match.status == FootballEventType.FINISH) {
+        if (this.props.match && this.props.match.status && this.props.match.status.status == FootballEventType.FINISH) {
           if (!await this.isUserLogin()) {
             this.setState({tryplayed: true})
             Taro.showToast({
@@ -1601,7 +1579,7 @@ class Live extends Component<PageOwnProps, PageState> {
 
   handleVideoTime = (e) => {
     const {danmuList = null, match = null} = this.props;
-    if ((match && match.status == FootballEventType.FINISH)) {
+    if ((match && match.status && match.status.status == FootballEventType.FINISH)) {
       this.setState({videoTime: Math.floor(e.detail.currentTime)})
       danmuList && danmuList.map(item => {
         if (item.time == Math.floor(e.detail.currentTime) && this.animElemIds[item.id] == null) {
@@ -1714,7 +1692,10 @@ class Live extends Component<PageOwnProps, PageState> {
   onShareMoment = () => {
     const {match = null} = this.props;
     this.setState({downLoading: true})
-    new Request().get(api.API_GET_SHARE_MOMENT_PICTURE, {matchId: match.id}).then((imageUrl: string) => {
+    new Request().get(api.API_GET_SHARE_MOMENT_PICTURE, {
+      matchId: match.id,
+      against: match.status && match.status.againstIndex ? match.status.againstIndex : 1
+    }).then((imageUrl: string) => {
       if (imageUrl == null) {
         Taro.showToast({title: "获取图片失败", icon: "none"});
         this.setState({downLoading: false})
@@ -1738,7 +1719,10 @@ class Live extends Component<PageOwnProps, PageState> {
     })
   }
   getSharePicture = (data) => {
-    new Request().get(api.API_GET_SHARE_PICTURE, {matchId: data.id}).then((imageUrl: string) => {
+    new Request().get(api.API_GET_SHARE_PICTURE, {
+      matchId: data.id,
+      against: data.status && data.status.againstIndex ? data.status.againstIndex : 1
+    }).then((imageUrl: string) => {
       if (imageUrl == null) {
         return;
       }
@@ -1858,18 +1842,20 @@ class Live extends Component<PageOwnProps, PageState> {
   }
   handleLeftSupport = () => {
     const {match = null} = this.props;
-    if (match == null || match.hostTeam == null) {
+    if (match == null || match.againstTeams == null) {
       return;
     }
-    this.setState({currentSupportTeam: match.hostTeam})
+    const {againstTeam} = this.getCurrentAgainstTeam();
+    this.setState({currentSupportTeam: againstTeam.hostTeam})
     this.showGiftPanel();
   }
   handleRightSupport = () => {
     const {match = null} = this.props;
-    if (match == null || match.guestTeam == null) {
+    if (match == null || match.againstTeams == null) {
       return;
     }
-    this.setState({currentSupportTeam: match.guestTeam})
+    const {againstTeam} = this.getCurrentAgainstTeam();
+    this.setState({currentSupportTeam: againstTeam.guestTeam})
     this.showGiftPanel();
   }
 
@@ -2032,7 +2018,7 @@ class Live extends Component<PageOwnProps, PageState> {
       openId: openid,
       leagueId: this.state.leagueId,
     };
-    if (this.props.match && this.props.match.status == -1) {
+    if (this.props.match && this.props.match.status && this.props.match.status.status == -1) {
       tmplIds.push(SUBSCRIBE_TEMPLATES.MATCH_START);
       param.matchId = this.props.match ? this.props.match.id : null;
     }
@@ -2076,9 +2062,18 @@ class Live extends Component<PageOwnProps, PageState> {
   handleDepositConfirm = () => {
     this.state.payCallback && this.state.payCallback(PAY_TYPE.DEPOSIT)
   }
+  getCurrentAgainstTeam = () => {
+    const match = this.props.match;
+    const matchAgainstTeams = match.againstTeams;
+    const matchStatus = match.status;
+    if (matchAgainstTeams && matchStatus) {
+      return {againstIndex: matchStatus.againstIndex, againstTeam: matchAgainstTeams[matchStatus.againstIndex]};
+    }
+    return {againstIndex: 1, againstTeam: null};
+  }
 
   render() {
-    const {match = null, matchStatus = null, payEnabled} = this.props;
+    const {match = null, payEnabled} = this.props;
     const {
       diffDayTime = {
         diffDay: "",
@@ -2097,7 +2092,7 @@ class Live extends Component<PageOwnProps, PageState> {
                                   className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "iOS端暂不支持观看"}</AtButton>}
             </View>
             :
-            (payEnabled && this.state.needGiftLive && match.status != FootballEventType.FINISH && liveStatus != LiveStatus.UNOPEN && this.state.heatRule && this.state.heatRule.available ?
+            (payEnabled && this.state.needGiftLive && match.status && match.status.status != FootballEventType.FINISH && liveStatus != LiveStatus.UNOPEN && this.state.heatRule && this.state.heatRule.available ?
               <View className='qz-live-match__video'>
                 <Image src={match.poster} className="qz-live-match__video-poster-img"/>
                 {match && <AtButton type='primary' onClick={this.switchToGiftSend}
@@ -2147,10 +2142,7 @@ class Live extends Component<PageOwnProps, PageState> {
                       <View className="qz-live-match__video-poster-text">
                         <View className='qz-live-match__video-poster-text__text'>
                           {liveStatus == LiveStatus.ONTIME ? <View>比赛还未开始请耐心等待...</View> : null}
-                          {liveStatus == LiveStatus.NOTPUSH && (matchStatus && matchStatus.status == 14) ?
-                            <View>中场休息中...</View> : null}
-                          {liveStatus == LiveStatus.NOTPUSH && (matchStatus && matchStatus.status != 14) ?
-                            <View>信号中断...</View> : null}
+                          {liveStatus == LiveStatus.NOTPUSH ? <View>信号中断...</View> : null}
                           {liveStatus == LiveStatus.LOADING ? <View>载入中...</View> : null}
                         </View>
                       </View>
@@ -2175,7 +2167,7 @@ class Live extends Component<PageOwnProps, PageState> {
                     ))}
                     <View className="qz-live-match__video-controllers__views">
                       <Image className="qz-live-match__video-controllers__views-img" src={views_icon}/>
-                      {this.props.match.chargeTimes && ((match.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.match.chargeTimes : (this.props.match.online ? this.props.match.online : "0")}
+                      {this.props.match.chargeTimes && ((match.status && match.status.status == FootballEventType.FINISH && match.isRecordCharge) || (match.status && match.status.status != FootballEventType.FINISH && match.isLiveCharge)) ? this.props.match.chargeTimes : (this.props.match.online ? this.props.match.online : "0")}
                     </View>
                     <View
                       className={`qz-live-match__video-controllers__right ${this.state.videoShowMore ? "qz-live-matc1h__video-controllers__right-more" : ""}`}>
@@ -2255,7 +2247,7 @@ class Live extends Component<PageOwnProps, PageState> {
                   {this.state.currentTab != tabs[TABS_TYPE.matchUp] ? <View/> : (
                     <View className="qz-live-match-up__content">
                       <MatchUp className="qz-live-match-up__match-up" matchInfo={match}
-                               matchStatus={matchStatus}
+                               matchStatus={match.status}
                                onlytime={this.isThisYear(new Date(match.startTime))}
                                onMonopolyClick={this.onMonopolyClick}/>
                       <View className="qz-live-match-up__function-bar">
@@ -2290,26 +2282,31 @@ class Live extends Component<PageOwnProps, PageState> {
                           onClick={() => {
                           }}/>
                       </View>
-                      {match.hostTeam && match.guestTeam ?
-                        (this.state.heatType == HEAT_TYPE.TEAM_HEAT ?
+                      {
+                        //todo 加上多个球队的对阵热度pk
+                      }
+                      {match.againstTeams ?
+                        (this.state.heatType == HEAT_TYPE.TEAM_HEAT && Object.keys(match.againstTeams).length == 1 ?
                             <HeatTeam
                               teamHeats={teamHeats}
                               onHandleLeftSupport={this.handleLeftSupport}
                               onHandleRightSupport={this.handleRightSupport}
                               startTime={this.state.heatStartTime}
                               endTime={this.state.heatEndTime}
-                            />
-                            :
-                            <NooiceBar
-                              percent={leftNooice == 0 && rightNooice == 0 ? 50 : (leftNooice * 100 / (leftNooice + rightNooice))}
-                              leftText={`${leftNooice}`}
-                              rightText={`${rightNooice}`}
-                              leftMoveClass={this.state.nooiceLeftMoveClass}
-                              rightMoveClass={this.state.nooiceRightMoveClass}
-                              handleLeftNooice={this.handleLeftNooice}
-                              handleRightNooice={this.handleRightNooice}
-                            />
+                            /> : null
                         ) : null}
+
+                      {match.againstTeams && this.state.heatType != HEAT_TYPE.TEAM_HEAT ?
+                        <NooiceBar
+                          percent={leftNooice == 0 && rightNooice == 0 ? 50 : (leftNooice * 100 / (leftNooice + rightNooice))}
+                          leftText={`${leftNooice}`}
+                          rightText={`${rightNooice}`}
+                          leftMoveClass={this.state.nooiceLeftMoveClass}
+                          rightMoveClass={this.state.nooiceRightMoveClass}
+                          handleLeftNooice={this.handleLeftNooice}
+                          handleRightNooice={this.handleRightNooice}
+                        />
+                        : null}
                       {match.type && match.type.indexOf(MATCH_TYPE.chattingRoom) != -1 &&
                       <ChattingRoom
                         isIphoneX={this.state.isIphoneX}
@@ -2340,12 +2337,7 @@ class Live extends Component<PageOwnProps, PageState> {
                     :
                     (
                       <View>
-                        {this.props.matchStatus.timeLines && this.props.matchStatus.timeLines.length > 0 ?
-                          <TimeLine
-                            timeline={this.props.matchStatus.timeLines.filter(ele => eventType[ele.eventType] != null)}
-                            matchInfo={this.props.match}/>
-                          : null}
-                        <Statistics statistics={this.props.matchStatus.statistics} matchInfo={this.props.match}/>
+                        <Statistics statistics={this.props.matchStatus.againstStatistics} matchInfo={this.props.match}/>
                       </View>
                     )
                   }
@@ -2353,10 +2345,7 @@ class Live extends Component<PageOwnProps, PageState> {
               </AtTabsPane>}
               {match.type && match.type.indexOf(MATCH_TYPE.lineUp) != -1 &&
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.lineUp]}>
-                <LineUp players={this.props.playerList}
-                        matchInfo={this.props.match}
-                        switchTab={this.switchTeamPlayer}
-                        loading={this.state.playerLoading}
+                <LineUp matchInfo={this.props.match}
                         hidden={this.state.currentTab != tabs[TABS_TYPE.lineUp]}/>
               </AtTabsPane>}
             </AtTabs>

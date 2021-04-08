@@ -26,9 +26,6 @@ type CommentParams = {
   pageSize: number,
   matchId: number,
 }
-type CommentCountParams = {
-  matchId: number,
-}
 type MathNooiceParams = {
   matchId: number,
   teamId: number,

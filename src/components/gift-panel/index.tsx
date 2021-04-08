@@ -277,7 +277,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
                           <Text>{data.name}</Text>
                         </View>
                         {data.type == global.GIFT_TYPE.CHARGE ? <View className="qz-gifts__grid-item-price">
-                            <View>{getYuan(data.price)}茄币</View>
+                            <View>{getYuan(data.price)}绝杀币</View>
                           </View> :
                           <View className="qz-gifts__grid-item-price">
                             <Text>{data.limitRemain > 0 ? `免费(余${data.limitRemain})` : "分享群得茄子"}</Text>
@@ -308,7 +308,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
                   <View className="qz-gifts__bottom-left">
                     {discountPrice ?
                       <View
-                        className="qz-gifts__bottom-price">茄币：{currentGift.type == global.GIFT_TYPE.CHARGE ? discountPrice : "免费"}</View>
+                        className="qz-gifts__bottom-price">绝杀币：{currentGift.type == global.GIFT_TYPE.CHARGE ? discountPrice : "免费"}</View>
                       : null}
                     {realPrice ?
                       <View className="qz-gifts__bottom-discount">(原价{realPrice})</View>

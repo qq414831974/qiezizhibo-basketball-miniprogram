@@ -35,7 +35,7 @@ class Collection extends Component<PageOwnProps, PageState> {
    */
   config: Config = {
     navigationBarTitleText: '收藏',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
   }
 

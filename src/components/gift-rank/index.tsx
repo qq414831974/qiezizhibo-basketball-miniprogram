@@ -79,7 +79,7 @@ class GiftRank extends Component<PageOwnProps, PageState> {
                           </View>
                           <View className='qz-giftrank-list__item-extra item-extra'>
                             <View className='item-extra__text'>
-                              {item.charge ? getYuan(item.charge) : 0}茄币
+                              {item.charge ? getYuan(item.charge) : 0}绝杀币
                             </View>
                           </View>
                         </View>

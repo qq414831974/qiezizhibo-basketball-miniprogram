@@ -58,7 +58,7 @@ class App extends Component {
     },
     tabBar: {
       color: "#666",
-      selectedColor: "#2d8cf0",
+      selectedColor: "#ff9900",
       backgroundColor: "#fafafa",
       borderStyle: 'white',
       list: [{
@@ -68,8 +68,8 @@ class App extends Component {
         text: "首页"
       }, {
         pagePath: "pages/match/match",
-        iconPath: "./assets/tab-bar/football.png",
-        selectedIconPath: "./assets/tab-bar/football-on.png",
+        iconPath: "./assets/tab-bar/basketball.png",
+        selectedIconPath: "./assets/tab-bar/basketball-on.png",
         text: "比赛"
       }, {
         pagePath: "pages/league/league",

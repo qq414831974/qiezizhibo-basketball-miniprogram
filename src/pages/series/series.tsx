@@ -43,7 +43,7 @@ class Series extends Component<PageOwnProps, PageState> {
    */
   config: Config = {
     navigationBarTitleText: '绝杀时刻',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
   }
   $setSharePath = () => `/pages/home/home?id=${this.getParamId()}&page=series`

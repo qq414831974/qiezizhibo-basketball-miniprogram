@@ -55,7 +55,7 @@ class MatchList extends Component<PageOwnProps, PageState> {
 
   config: Config = {
     navigationBarTitleText: '比赛',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
   }
 
@@ -238,7 +238,7 @@ class MatchList extends Component<PageOwnProps, PageState> {
                 <View className="at-row at-row--no-wrap">
                   <View className='at-col at-col-12 qz-match-list-order__item-wrap'>
                     {item.gradeInfo && item.gradeInfo.award ? `奖品：${item.gradeInfo.award}` : ""}
-                    {item.gradeInfo && item.gradeInfo.awardDeposit ? `奖品：${getYuan(item.gradeInfo.awardDeposit)}茄币` : ""}
+                    {item.gradeInfo && item.gradeInfo.awardDeposit ? `奖品：${getYuan(item.gradeInfo.awardDeposit)}绝杀币` : ""}
                   </View>
                 </View>
                 : null}

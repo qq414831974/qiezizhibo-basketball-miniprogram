@@ -50,9 +50,9 @@ export class FootballEventType {
 
 export const MATCH_TYPE = {
   timeLine: 1,
-  lineUp: 3,
-  chattingRoom: 4,
-  clip: 5,
+  lineUp: 2,
+  chattingRoom: 3,
+  clip: 4,
 }
 export const LEAGUE_TABS_TYPE = {
   leagueRule: "leagueRule",

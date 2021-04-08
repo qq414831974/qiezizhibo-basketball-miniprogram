@@ -1,25 +1,32 @@
 import Taro, {Component} from '@tarojs/taro'
-import {View, ScrollView, Text, Image} from '@tarojs/components'
+import {View, ScrollView, Text, Image, Picker} from '@tarojs/components'
 import {AtSegmentedControl, AtActivityIndicator} from 'taro-ui'
 import './index.scss'
 import noperson from '../../../../assets/no-person.png';
 import shirt from '../../../../assets/live/t-shirt.png';
+import Request from "../../../../utils/request";
+import * as api from "../../../../constants/api";
 
+const HOSTTEAM = 0;
+const GUESTTEAM = 1;
 
 type PageStateProps = {}
 
 type PageDispatchProps = {}
 
 type PageOwnProps = {
-  players: [];
   matchInfo: any;
-  switchTab: any;
-  loading: boolean;
   hidden: any;
 }
 
 type PageState = {
   current: number;
+  players: [];
+  loading: boolean;
+  selectorValue: any;
+  againstSelector: any;
+  againstSelectorValue: any;
+  currentAgainstIndex: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -34,29 +41,107 @@ class LineUp extends Component<PageOwnProps, PageState> {
   constructor(props) {
     super(props)
     this.state = {
-      current: 0
+      current: HOSTTEAM,
+      players: [],
+      loading: false,
+      selectorValue: 0,
+      againstSelector: [],
+      againstSelectorValue: [],
+      currentAgainstIndex: 1,
     }
+  }
+
+  componentDidMount() {
+    const {matchInfo = {}} = this.props
+    if (matchInfo && matchInfo.againstTeams) {
+      this.handleClick(HOSTTEAM);
+      let againstSelector: any = [];
+      let againstSelectorValue: any = [];
+      for (let key of Object.keys(matchInfo.againstTeams)) {
+        const againstTeam = matchInfo.againstTeams[key];
+        if (againstTeam && againstTeam.hostTeam && againstTeam.guestTeam) {
+          againstSelector.push(`${againstTeam.hostTeam.name} VS ${againstTeam.guestTeam.name}`);
+          againstSelectorValue.push(key);
+        }
+      }
+      this.setState({againstSelector: againstSelector, againstSelectorValue: againstSelectorValue})
+    }
+  }
+
+  getTeamPlayerList = (teamId) => {
+    this.setState({loading: true})
+    new Request().get(api.API_PLAYERS, {teamId: teamId, pageSize: 100, pageNum: 1}).then((data: any) => {
+      if (data) {
+        this.setState({players: data.records, loading: false})
+      }
+    });
   }
 
   handleClick = (value) => {
     this.setState({
       current: value
     }, () => {
-      this.props.switchTab(this.state.current);
+      this.getCurrentAgainstTeamPlayers(value);
     })
+  }
+  onPickerChange = (e) => {
+    this.setState({
+      selectorValue: e.detail.value,
+      currentAgainstIndex: this.state.againstSelectorValue[e.detail.value]
+    }, () => {
+      this.handleClick(HOSTTEAM);
+    })
+  }
+  getCurrentAgainstTeams = () => {
+    const currentAgainstIndex = this.state.currentAgainstIndex;
+    let teams: Array<string> = [];
+    const {matchInfo = {}} = this.props
+    if (matchInfo && matchInfo.againstTeams) {
+      const againstTeam = matchInfo.againstTeams[currentAgainstIndex];
+      if (againstTeam && againstTeam.hostTeam) {
+        teams.push(againstTeam.hostTeam.name);
+      }
+      if (againstTeam && againstTeam.guestTeam) {
+        teams.push(againstTeam.guestTeam.name);
+      }
+    }
+    return teams;
+  }
+  getCurrentAgainstTeamPlayers = (value) => {
+    const currentAgainstIndex = this.state.currentAgainstIndex;
+    const {matchInfo = {}} = this.props
+    if (matchInfo && matchInfo.againstTeams) {
+      const againstTeam = matchInfo.againstTeams[currentAgainstIndex];
+      if (againstTeam && againstTeam.hostTeam && value == HOSTTEAM) {
+        this.getTeamPlayerList(againstTeam.hostTeam.id)
+      }
+      if (againstTeam && againstTeam.guestTeam && value == GUESTTEAM) {
+        this.getTeamPlayerList(againstTeam.guestTeam.id)
+      }
+    }
   }
 
   render() {
-    const {players = [], matchInfo = {}, loading = false, hidden = false} = this.props
-    const hostTeam = matchInfo.hostTeam ? matchInfo.hostTeam : {name: "主队"};
-    const guestTeam = matchInfo.guestTeam ? matchInfo.guestTeam : {name: "客队"};
+    const {hidden = false, matchInfo = {}} = this.props
+    const {players = [], loading = false,} = this.state
     if (hidden) {
       return <View/>
     }
     return (
       <View className="qz-lineup">
+        {matchInfo.againstTeams && Object.keys(matchInfo.againstTeams).length > 1 && <Picker
+          className="h-full center"
+          mode='selector'
+          range={this.state.againstSelector}
+          onChange={this.onPickerChange}
+          value={this.state.selectorValue}>
+          <View className="qz-lineup-selector-text">
+            {this.state.againstSelector[this.state.selectorValue]}
+            <View className="at-icon at-icon-chevron-down qz-lineup-selector-text-chevron"/>
+          </View>
+        </Picker>}
         <AtSegmentedControl
-          values={[hostTeam.name, guestTeam.name]}
+          values={this.getCurrentAgainstTeams()}
           onClick={this.handleClick}
           current={this.state.current}
         />

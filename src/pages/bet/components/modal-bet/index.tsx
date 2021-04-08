@@ -398,7 +398,7 @@ class ModalBet extends Component<PageOwnProps | any, PageState> {
                   className={`qz-bet-modal__grid-item ${data.grade == currentBet.grade ? "qz-bet-modal__grid-item-active" : ""}`}
                   key={data.grade}
                   onClick={this.handleBetItemClick.bind(this, data)}>
-                  <View className="qz-bet-modal__grid-item-text">{getYuan(data.price)}茄币</View>
+                  <View className="qz-bet-modal__grid-item-text">{getYuan(data.price)}绝杀币</View>
                 </View>
               )}
             </View>
@@ -408,12 +408,12 @@ class ModalBet extends Component<PageOwnProps | any, PageState> {
               <View className="qz-bet-modal__grid-content-price">•
                 免费竞猜次数剩余：{freeBetTimes != null ? freeBetTimes : 0}</View>
               <View
-                className="qz-bet-modal__grid-content-price">{`• 价格：${getYuan(currentBet.price)}茄币 或 免费竞猜次数${currentBet.freeTime}次`}</View>
+                className="qz-bet-modal__grid-content-price">{`• 价格：${getYuan(currentBet.price)}绝杀币 或 免费竞猜次数${currentBet.freeTime}次`}</View>
               {currentBet.award ?
                 <View className="qz-bet-modal__grid-content-award">• 奖品：{currentBet.award}</View> : null}
               {currentBet.awardDeposit ?
                 <View className="qz-bet-modal__grid-content-award">•
-                  奖品：{getYuan(currentBet.awardDeposit)}茄币</View> : null}
+                  奖品：{getYuan(currentBet.awardDeposit)}绝杀币</View> : null}
             </View>}
           </AtModalContent> : null}
           <AtModalAction>

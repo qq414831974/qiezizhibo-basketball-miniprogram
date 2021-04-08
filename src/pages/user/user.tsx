@@ -68,7 +68,7 @@ class User extends Component<PageOwnProps, PageState> {
    */
   config: Config = {
     navigationBarTitleText: '',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
     enablePullDownRefresh: true
   }
@@ -449,7 +449,7 @@ class User extends Component<PageOwnProps, PageState> {
           <Button onClick={this.onDepositClick} className='list button-list'>
             <View className='list_title'>
               <AtIcon className='list-title-icon' value='money' size='18' color='#333'/>
-              {payEnabled ? "我的茄币" : "我的茄币"}
+              {payEnabled ? "我的绝杀币" : "我的绝杀币"}
             </View>
             <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
           </Button>

@@ -337,7 +337,7 @@ class ModalCharge extends Component<PageOwnProps | any, PageState> {
                 </View> : null}
               {(charge && charge.monopolyOnly) || !giftDiscount ? null :
                 <View className="light-gray bold qz-pay-modal-content_tip">
-                  • 在本直播间内投票超过{getYuan(this.props.giftDiscountPrice)}茄币（{getYuan(this.props.giftDiscountPrice)}元）即可观看比赛录像
+                  • 在本直播间内投票超过{getYuan(this.props.giftDiscountPrice)}绝杀币（{getYuan(this.props.giftDiscountPrice)}元）即可观看比赛录像
                 </View>}
             </View>
           </AtModalContent> : null}

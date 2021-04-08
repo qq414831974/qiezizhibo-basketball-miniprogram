@@ -1,4 +1,5 @@
 @import '../../../../app';
+@import "~taro-ui/dist/style/components/icon.scss";
 
 @mixin active {
   transition: background-color 0.3s;
@@ -36,6 +37,21 @@
   }
 }
 
+.qz-lineup-selector-text {
+  padding: 10px 50px 10px 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+  position: relative;
+  &-chevron{
+    color: rgba(0, 0, 0, 0.2);
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
 .qz-lineup {
   width: 90vw;
   margin: 0 5vw;
@@ -58,11 +74,13 @@
 .qz-lineup-list {
   background-color: $color-bg;
   position: relative;
+
   &__item-container {
     display: flex;
     align-items: center;
     -webkit-box-align: center;
   }
+
   &__item {
     padding: $spacing-v-sm $spacing-h-sm;
     position: relative;
@@ -72,10 +90,12 @@
     line-height: $line-height-zh;
     @include active;
     @include hairline-bottom-relative($left: $spacing-h-sm);
+
     &-avatar {
       width: $at-avatar-size-sm;
       height: $at-avatar-size-sm;
       margin-right: $spacing-v-xl;
+
       image {
         width: 100%;
         height: 100%;
@@ -83,6 +103,7 @@
       }
     }
   }
+
   .item-content {
     &__info {
       &-title {
@@ -101,12 +122,14 @@
       }
     }
   }
+
   &__item-content {
     flex: 1;
     -webkit-box-flex: 1;
     overflow: hidden;
     margin-right: 40px;
   }
+
   .item-extra {
     position: relative;
 
@@ -117,10 +140,12 @@
       margin-right: $spacing-v-xl;
       width: 60px;
       height: 60px;
+
       image {
         width: 100%;
         height: 100%;
       }
+
       text {
         position: absolute;
         left: 0;
@@ -136,6 +161,7 @@
       }
     }
   }
+
   &__item-extra {
     flex: 0 0 $at-list-extra-width;
     -webkit-box-flex: $at-list-extra-width;

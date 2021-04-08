@@ -1,6 +1,6 @@
 const config = {
   projectName: 'qiezizhibo-basketball-miniprogram',
-  date: '2019-8-1',
+  date: '2021-4-2',
   designWidth: 750,
   deviceRatio: {
     '640': 2.34 / 2,
@@ -8,7 +8,7 @@ const config = {
     '828': 1.81 / 2
   },
   sourceRoot: 'src',
-  outputRoot: '../../WeChatProjects/qiezizhibo-tiyu',
+  outputRoot: '../../WeChatProjects/qiezizhibo-basketball',
   babel: {
     sourceMap: true,
     presets: [

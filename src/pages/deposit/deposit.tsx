@@ -67,8 +67,8 @@ class Deposit extends Component<PageOwnProps, PageState> {
    * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
    */
   config: Config = {
-    navigationBarTitleText: '我的茄币',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarTitleText: '我的绝杀币',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
   }
 
@@ -202,7 +202,7 @@ class Deposit extends Component<PageOwnProps, PageState> {
       openId: openId,
       userNo: userNo,
       type: global.ORDER_TYPE.deposit,
-      description: `绝杀时刻-茄币-` + price * 100,
+      description: `绝杀时刻-绝杀币-` + price * 100,
       attach: JSON.stringify({
         price: price * 100
       })
@@ -298,7 +298,7 @@ class Deposit extends Component<PageOwnProps, PageState> {
             {loading ? "-" : getYuan(deposit)}
           </View>
           <View className='qz-deposit-header__title-hint'>
-            茄币
+            绝杀币
           </View>
           {this.props.payEnabled ?
             <AtButton

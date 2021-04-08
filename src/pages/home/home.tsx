@@ -1,7 +1,7 @@
 import Taro, {Component, Config} from '@tarojs/taro'
 import {View, Text, Button, Image, Swiper, SwiperItem, Navigator, ScrollView} from '@tarojs/components'
 import {connect} from '@tarojs/redux'
-import {AtNoticebar, AtAvatar, AtIcon, AtCurtain, AtLoadMore} from 'taro-ui'
+import {AtNoticebar, AtIcon, AtCurtain, AtLoadMore} from 'taro-ui'
 import NavigationBar from './components/navigation-search-bar'
 import qqmapjs from '../../sdk/qqmap-wx-jssdk.min.js';
 
@@ -84,7 +84,7 @@ class Home extends Component<PageOwnProps, PageState> {
    */
   config: Config = {
     navigationBarTitleText: '绝杀时刻',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
     disableScroll: true,
   }
@@ -145,31 +145,11 @@ class Home extends Component<PageOwnProps, PageState> {
       if (this.props.locationConfig && this.props.locationConfig.province) {
         initLocation();
       } else {
-        // Taro.getSetting({
-        //   success(res) {
-        //     const userLocation = res && res.authSetting ? res.authSetting["scope.userLocation"] : null;
-        //     if (userLocation == null || (userLocation != null && userLocation == true)) {
-        //       Taro.getLocation({
-        //         success: (res) => {
-        //           getLocation(res.latitude, res.longitude);
-        //         }, fail: () => {
-        //           Taro.showToast({title: "获取位置信息失败", icon: "none"});
-        //           refresh();
-        //         }
-        //       })
-        //     } else {
-        //       initLocation();
-        //     }
-        //   }
-        // })
         configAction.setLocationConfig({city: null, province: '全国'}).then(() => {
           initLocation();
         })
       }
     })
-    // if (this.state.curtain != null) {
-    //   this.setState({curtainShow: true})
-    // }
   }
 
   componentDidHide() {
@@ -465,10 +445,10 @@ class Home extends Component<PageOwnProps, PageState> {
                                onClick={this.onLeagueItemClick.bind(this, item)}>
                     <Image src={hotIcon} className="qz-home-league-item-icon"/>
                     <View className="qz-home-league-item-avatar">
-                      <Image src={item.headImg}/>
+                      <Image src={item.headImg ? item.headImg : defaultLogo}/>
                     </View>
                     <Text className="qz-home-league-item-name">
-                      {item.shortname ? item.shortname : item.name}
+                      {item.shortName ? item.shortName : item.name}
                     </Text>
                   </View>
                 })}
@@ -485,7 +465,7 @@ class Home extends Component<PageOwnProps, PageState> {
                 <View className='qz-home-league-detail-title' onClick={this.onLeagueItemClick.bind(this, item)}>
                   <Image src={item.headImg ? item.headImg : defaultLogo}/>
                   <Text className='qz-home-league-detail-title-desc'>
-                    {/*{item.shortname ? item.shortname : item.name}*/}
+                    {/*{item.shortName ? item.shortName : item.name}*/}
                     {item.name}
                   </Text>
                 </View>

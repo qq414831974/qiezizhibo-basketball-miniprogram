@@ -9,7 +9,6 @@ import './leagueManager.scss'
 import leagueAction from "../../actions/league";
 import LeagueManagerMatches from "./components/league-manager-matches"
 import LeagueTeamTable from "./components/league-team-table"
-import LeaguePlayerTable from "./components/league-player-table";
 import LeagueRegulations from "./components/league-regulations";
 import withShare from "../../utils/withShare";
 import * as global from "../../constants/global";
@@ -34,7 +33,6 @@ import depositAction from "../../actions/deposit";
 
 type PageStateProps = {
   leagueTeams: any;
-  leaguePlayers: any;
   locationConfig: { city: string, province: string }
   shareSentence: any;
   userInfo: any;
@@ -118,7 +116,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
    */
   config: Config = {
     navigationBarTitleText: '绝杀时刻',
-    navigationBarBackgroundColor: '#2d8cf0',
+    navigationBarBackgroundColor: '#ff9900',
     navigationBarTextStyle: 'white',
   }
 
@@ -708,7 +706,6 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   getLeagueList = (id) => {
     Promise.all([
       leagueAction.getLeagueTeam({leagueId: id}),
-      leagueAction.getLeaguePlayer({leagueId: id, goal: true}),
       leagueAction.getLeagueReport(id),
     ]).then(() => {
       this.setState({loading: false})
@@ -761,12 +758,6 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     if (leagueRankSetting.showLeagueTeam) {
       tabList.push({title: '积分榜'})
       tabs[global.LEAGUE_TABS_TYPE.leagueTeam] = tabIndex;
-      tabIndex = tabIndex + 1;
-    }
-    //射手榜
-    if (leagueRankSetting.showLeaguePlayer) {
-      tabList.push({title: '射手榜'})
-      tabs[global.LEAGUE_TABS_TYPE.leaguePlayer] = tabIndex;
       tabIndex = tabIndex + 1;
     }
     return {tabList, tabs};
@@ -846,7 +837,7 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   }
 
   render() {
-    const {leaguePlayers, leagueTeams} = this.props
+    const {leagueTeams} = this.props
     const {league, leagueRankSetting} = this.state
     let {tabList, tabs} = this.getTabsList();
 
@@ -933,14 +924,6 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
                 loading={this.state.tabloading}
                 visible={this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leagueTeam]}
                 teamGroup={leagueTeams}/>
-            </AtTabsPane>}
-            {leagueRankSetting.showLeaguePlayer &&
-            <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.leaguePlayer]}>
-              <LeaguePlayerTable
-                leagueMatch={league}
-                loading={this.state.tabloading}
-                visible={this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leaguePlayer]}
-                playerList={leaguePlayers}/>
             </AtTabsPane>}
           </AtTabs>}
         </View>
@@ -1051,7 +1034,6 @@ const mapStateToProps = (state) => {
   return {
     deposit: state.deposit.depositInfo ? state.deposit.depositInfo.deposit : 0,
     userInfo: state.user.userInfo,
-    leaguePlayers: state.league.leaguePlayers,
     leagueTeams: state.league.leagueTeams,
     locationConfig: state.config.locationConfig,
     shareSentence: state.config ? state.config.shareSentence : [],
