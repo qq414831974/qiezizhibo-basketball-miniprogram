@@ -55,6 +55,7 @@ export const API_MATCH_NOOICE = `${basketball_service}/match/nooice`;
 export const API_MATCH_COMMENT = `${chat_service}/comment`;
 export const API_MATCH_COMMENT_DANMU = `${chat_service}/comment/danmu`;
 export const API_MATCH_MEDIA = `${media_service}/media/match`;
+export const API_MATCH_ONLINE = `${basketball_service}/match/online`;
 
 //team
 export const API_TEAM = (id) => `${basketball_service}/team/${id}`;

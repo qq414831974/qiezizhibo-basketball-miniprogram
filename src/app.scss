@@ -570,7 +570,11 @@ $at-timeline-line-color: $color-border-lighter !default;
 .half-circle-button {
   border-radius: 0 30px 30px 0 !important;
 }
-
+.at-button--primary{
+  color: #FFF;
+  border: 1PX solid $color-bg-orange-main;
+  background: $color-bg-orange-main;
+}
 .at-number-input-without-button {
   display: flex;
   border: none;

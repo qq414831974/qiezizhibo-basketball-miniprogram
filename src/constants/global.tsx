@@ -100,7 +100,7 @@ export const REPOST_TEXT = [
   "玩归玩，闹归闹，直播间支持我一票！",
   "不来现场看球，直播间也舍不得打开吗？快进来支持！",
   "我在球场上打飞机，你来直播间刷飞机~",
-  "踢球最怕没人看，你会来看我吗？",
+  "打球最怕没人看，你会来看我吗？",
 ];
 export const HEAT_TYPE = {
   TEAM_HEAT: 0,
@@ -127,10 +127,10 @@ export const BET_STATUS = {
   BET_CANCEL: 4,
 }
 export const SUBSCRIBE_TEMPLATES = {
-  MATCH_START: "Sh-UGpahk_q0RiXLtY1N1NAvPjO_10rh_vkimwC-Xi0",
-  HEAT_SURPASS: "y8VV0Wp1ndS4phfhSUgrA9QyTwgadZ2VJtmjAOMLx3M",
-  HEAT_COUNTDOWN: "2rDzauHgfdE55lncK3jgCuZuoKyNBeYj6gj4UG03S50",
-  BET_SUCCESS: "KIvAhpqkNYGc84S6ssvqN6J5UNHZS0xT_C6P-TeugCo"
+  MATCH_START: "_AyyJaoFIIfm_voTzPQfC_KXB4dfS_8K9iZjFO9tpww",
+  HEAT_SURPASS: "4jmTnrarVi0UdvfNPiqmJ6YUD0ehPH44KtKw7XmcTlk",
+  HEAT_COUNTDOWN: "lZCEme84RpK6JNQdc7LlrfHcrngPbfpSBabozSb3pio",
+  BET_SUCCESS: "gxSzekpYrOhJDvMvBYBGMhiEMxOTtjqZLwYXjxXVGLI"
 }
 export const PAY_TYPE = {
   ONLINE: 0,

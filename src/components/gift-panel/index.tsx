@@ -280,7 +280,7 @@ class GiftPanel extends Component<PageOwnProps | any, PageState> {
                             <View>{getYuan(data.price)}绝杀币</View>
                           </View> :
                           <View className="qz-gifts__grid-item-price">
-                            <Text>{data.limitRemain > 0 ? `免费(余${data.limitRemain})` : "分享群得茄子"}</Text>
+                            <Text>{data.limitRemain > 0 ? `免费(余${data.limitRemain})` : "分享群得免费礼物"}</Text>
                           </View>}
                         <View className="qz-gifts__grid-item-price">
                           <Image className="qz-gifts__grid-item-price__image" src={flame}/>
