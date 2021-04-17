@@ -17,6 +17,7 @@ type PageDispatchProps = {}
 type PageOwnProps = {
   matchInfo: any;
   hidden: any;
+  bindOnClick: any;
 }
 
 type PageState = {
@@ -52,9 +53,11 @@ class LineUp extends Component<PageOwnProps, PageState> {
   }
 
   componentDidMount() {
-    const {matchInfo = {}} = this.props
+    const {matchInfo = {},bindOnClick} = this.props
     if (matchInfo && matchInfo.againstTeams) {
-      this.handleClick(HOSTTEAM);
+      bindOnClick(()=>{
+        this.handleClick(HOSTTEAM);
+      })
       let againstSelector: any = [];
       let againstSelectorValue: any = [];
       for (let key of Object.keys(matchInfo.againstTeams)) {

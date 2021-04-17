@@ -176,6 +176,7 @@ type PageState = {
   currentPrice: number;
   matchClips: any;
   adAvailable: boolean;
+  onLineUpClick: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -301,6 +302,7 @@ class Live extends Component<PageOwnProps, PageState> {
       currentPrice: 0,
       matchClips: null,
       adAvailable: false,
+      onLineUpClick: null,
     }
   }
 
@@ -359,7 +361,7 @@ class Live extends Component<PageOwnProps, PageState> {
   componentDidMount() {
     // componentDidShow() {
     const {payEnabled} = this.props;
-    if(!payEnabled){
+    if (!payEnabled) {
       this.initPayEnable();
     }
     this.iphoneXAdjust();
@@ -1215,15 +1217,11 @@ class Live extends Component<PageOwnProps, PageState> {
     return false;
   }
   switchTab = (tab) => {
-    // const {match = null} = this.props;
-    // const tabs: Array<any> = [];
-    // let tabIndex = 0;
-    // match && match.type.map(item => {
-    //   if (item != 1) {
-    //     tabIndex = tabIndex + 1;
-    //     tabs[item] = tabIndex;
-    //   }
-    // })
+    const {match = null} = this.props;
+    let {tabs} = this.getTabsList(match);
+    if (tab == tabs[TABS_TYPE.lineUp]) {
+      this.state.onLineUpClick && this.state.onLineUpClick();
+    }
     this.setState({
       currentTab: tab
     })
@@ -2111,6 +2109,9 @@ class Live extends Component<PageOwnProps, PageState> {
     }
     return {againstIndex: 1, againstTeam: null};
   }
+  bindLineUpOnClick = (onclick) => {
+    this.setState({onLineUpClick: onclick})
+  }
 
   render() {
     const {match = null, payEnabled} = this.props;
@@ -2386,7 +2387,9 @@ class Live extends Component<PageOwnProps, PageState> {
               {match.type && match.type.indexOf(MATCH_TYPE.lineUp) != -1 &&
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.lineUp]}>
                 <LineUp matchInfo={this.props.match}
-                        hidden={this.state.currentTab != tabs[TABS_TYPE.lineUp]}/>
+                        hidden={this.state.currentTab != tabs[TABS_TYPE.lineUp]}
+                        bindOnClick={this.bindLineUpOnClick}
+                />
               </AtTabsPane>}
             </AtTabs>
           </View>
