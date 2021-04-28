@@ -36,6 +36,7 @@ import {
   TABS_TYPE,
   SUBSCRIBE_TEMPLATES,
   PAY_TYPE,
+  CacheManager
 } from "../../constants/global";
 import defaultLogo from '../../assets/default-logo.png'
 import star from '../../assets/live/star.png'
@@ -517,11 +518,17 @@ class Live extends Component<PageOwnProps, PageState> {
     if (userNo == null) {
       return;
     }
-    new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
-      if (ability && ability.enablePay) {
+    Taro.getSystemInfo().then((systemData) => {
+      if (systemData.platform == 'android') {
         configAction.setPayEnabled(true);
-      } else {
-        configAction.setPayEnabled(false);
+      } else if (systemData.platform == 'ios') {
+        new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
+          if (ability && ability.enablePay) {
+            configAction.setPayEnabled(true);
+          } else {
+            configAction.setPayEnabled(false);
+          }
+        })
       }
     })
   }
@@ -794,7 +801,11 @@ class Live extends Component<PageOwnProps, PageState> {
   getLiveInfo = (id, callback?) => {
     this.setState({liveLoading: true})
     // liveAction.livePing(id).then((res) => {
-    new Request().get(api.API_ACTIVITY_PING, {activityId: id}, false).then((res: any) => {
+    let url = api.API_ACTIVITY_PING;
+    if (CacheManager.getInstance().CACHE_ENABLED) {
+      url = api.API_CACHED_LIVE_MANUAL(id);
+    }
+    new Request().get(url, {activityId: id}, false).then((res: any) => {
       if (res.isPushing) {
         this.setState({ping: res, liveLoaded: true, liveLoading: false}, () => {
           callback && callback()
@@ -1075,7 +1086,7 @@ class Live extends Component<PageOwnProps, PageState> {
   getDiffTime = (data = null) => {
     const {match = data} = this.props;
     if (match) {
-      const startTime = match.startTime;
+      const startTime = new Date(match.startTime);
       if (startTime) {
         const diff = getTimeDifference(startTime);
         this.setState({
@@ -2130,7 +2141,7 @@ class Live extends Component<PageOwnProps, PageState> {
             <View className='qz-live-match__video'>
               <Image src={match.poster} className="qz-live-match__video-poster-img"/>
               {match && <AtButton onClick={this.onPayClick} type='primary'
-                                  className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "iOS端暂不支持观看"}</AtButton>}
+                                  className="qz-live-match__video-poster-pay">{payEnabled ? "支付并观看" : "由于相关规范，iOS功能暂不可用"}</AtButton>}
             </View>
             :
             (payEnabled && this.state.needGiftLive && match.status && match.status.status != FootballEventType.FINISH && liveStatus != LiveStatus.UNOPEN && this.state.heatRule && this.state.heatRule.available ?

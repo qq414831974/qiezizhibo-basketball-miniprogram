@@ -86,12 +86,12 @@ class LeagueTeamTable extends Component<PageOwnProps | any, PageState> {
     return (
       <ScrollView scrollY className='qz-league-team-table__result'>
         <View className='qz-league-team-table__result-header'>
-          <View>积分</View>
-          <View>进/失</View>
-          <View>负</View>
-          <View>平</View>
-          <View>胜</View>
-          <View>赛</View>
+          <View className='qz-league-team-table__result-header-cell-big'>积分</View>
+          <View className='qz-league-team-table__result-header-cell-big'>进/失</View>
+          <View className='qz-league-team-table__result-header-cell-big'>胜率</View>
+          <View className='qz-league-team-table__result-header-cell'>负</View>
+          <View className='qz-league-team-table__result-header-cell'>胜</View>
+          <View className='qz-league-team-table__result-header-cell'>赛</View>
         </View>
         <View className='qz-league-team-table__result-content'>
           {teamGroupList.map((group => {
@@ -117,12 +117,12 @@ class LeagueTeamTable extends Component<PageOwnProps | any, PageState> {
                         </View>
                         <View className='qz-league-team-table__list-item__point'>{teamInfo.matchTotal}</View>
                         <View className='qz-league-team-table__list-item__point'>{teamInfo.matchWin}</View>
-                        <View className='qz-league-team-table__list-item__point'>{teamInfo.matchDraw}</View>
                         <View className='qz-league-team-table__list-item__point'>{teamInfo.matchLost}</View>
-                        <View className='qz-league-team-table__list-item__point'>
+                        <View className='qz-league-team-table__list-item__point-big'>{teamInfo.matchWin * 100 / teamInfo.matchTotal}%</View>
+                        <View className='qz-league-team-table__list-item__point-big'>
                           {`${teamInfo.totalGoal}/${teamInfo.totalGoalLost}`}
                         </View>
-                        <View className='qz-league-team-table__list-item__point'>{teamInfo.ranks}</View>
+                        <View className='qz-league-team-table__list-item__point-big'>{teamInfo.ranks}</View>
                       </View>
                     )
                   }))}

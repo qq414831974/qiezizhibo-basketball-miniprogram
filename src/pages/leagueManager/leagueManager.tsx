@@ -273,11 +273,17 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
     if (userNo == null) {
       return;
     }
-    new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
-      if (ability && ability.enablePay) {
+    Taro.getSystemInfo().then((systemData) => {
+      if (systemData.platform == 'android') {
         configAction.setPayEnabled(true);
-      } else {
-        configAction.setPayEnabled(false);
+      } else if (systemData.platform == 'ios') {
+        new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
+          if (ability && ability.enablePay) {
+            configAction.setPayEnabled(true);
+          } else {
+            configAction.setPayEnabled(false);
+          }
+        })
       }
     })
   }
@@ -711,7 +717,11 @@ class LeagueManager extends Component<PageOwnProps, PageState> {
   getLeagueInfo = (id) => {
     this.setState({loading: true})
     Taro.showLoading({title: global.LOADING_TEXT})
-    new Request().get(api.API_LEAGUE(id), null).then((data: any) => {
+    let url = api.API_LEAGUE(id);
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      url = api.API_CACHED_LEAGUE(id);
+    }
+    new Request().get(url, null).then((data: any) => {
       this.setState({league: data}, () => {
         this.getLeagueList(id);
         this.getLeagueRankSetting(id);

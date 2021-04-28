@@ -85,7 +85,11 @@ class League extends Component<PageOwnProps, PageState> {
   getLeagueList = () => {
     this.setState({loading: true})
     Taro.showLoading({title: global.LOADING_TEXT})
-    new Request().get(api.API_LEAGUE_SERIES, {
+    let url = api.API_LEAGUE_SERIES;
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      url = api.API_CACHED_LEAGUE_LEAGUE;
+    }
+    new Request().get(url, {
       pageNum: 1,
       pageSize: 10,
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
@@ -104,6 +108,9 @@ class League extends Component<PageOwnProps, PageState> {
     });
   }
   nextPage = () => {
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      return;
+    }
     if (this.state.loadingMore) {
       return;
     }

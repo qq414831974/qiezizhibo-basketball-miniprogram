@@ -141,14 +141,21 @@ class Home extends Component<PageOwnProps, PageState> {
     // const getLocation = this.getLocation;
     const initLocation = this.initLocation;
     // const refresh = this.refresh;
-    configAction.getLocationConfig().then(() => {
-      if (this.props.locationConfig && this.props.locationConfig.province) {
-        initLocation();
+    new Request().get(api.API_CACHED_CONTROLLER, null).then((data: any) => {
+      if (data.available) {
+        global.CacheManager.getInstance().CACHE_ENABLED = true;
       } else {
-        configAction.setLocationConfig({city: null, province: '全国'}).then(() => {
-          initLocation();
-        })
+        global.CacheManager.getInstance().CACHE_ENABLED = false;
       }
+      configAction.getLocationConfig().then(() => {
+        if (this.props.locationConfig && this.props.locationConfig.province) {
+          initLocation();
+        } else {
+          configAction.setLocationConfig({city: null, province: '全国'}).then(() => {
+            initLocation();
+          })
+        }
+      })
     })
   }
 
@@ -166,6 +173,7 @@ class Home extends Component<PageOwnProps, PageState> {
         this.startTimer_bulletin();
         Taro.getSystemInfo().then(async (systemData) => {
           if (systemData.platform == 'android') {
+            configAction.setPayEnabled(true);
             //android
           } else if (systemData.platform == 'ios') {
             const list = data.map(item => item.content)
@@ -189,6 +197,8 @@ class Home extends Component<PageOwnProps, PageState> {
             }
           }
         })
+      }else {
+        configAction.setPayEnabled(true);
       }
     });
   }
@@ -229,24 +239,31 @@ class Home extends Component<PageOwnProps, PageState> {
   refresh = () => {
     Taro.showLoading({title: global.LOADING_TEXT})
     this.getBannerConfig().then(() => {
-      new Request().get(api.API_LEAGUES, {
-        pageSize: 10,
-        pageNum: 1,
-        leagueType: 3,
-        sortField: "sortIndex",
-        sortOrder: "desc",
-        country: "中国",
-        province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
-        matchNum: 2,
-      }).then((data: any) => {
-        if (data) {
-          this.setState({leagueList: data});
-        }
-        Taro.hideLoading();
-      });
+    });
+    let url = api.API_LEAGUES;
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      url = api.API_CACHED_HOME_LEAGUES;
+    }
+    new Request().get(url, {
+      pageSize: 10,
+      pageNum: 1,
+      leagueType: 3,
+      sortField: "sortIndex",
+      sortOrder: "desc",
+      country: "中国",
+      province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
+      matchNum: 2,
+    }).then((data: any) => {
+      if (data) {
+        this.setState({leagueList: data});
+      }
+      Taro.hideLoading();
     });
   }
   nextPage = () => {
+    if (global.CacheManager.getInstance().CACHE_ENABLED) {
+      return;
+    }
     if (this.state.loadingMore) {
       return;
     }
