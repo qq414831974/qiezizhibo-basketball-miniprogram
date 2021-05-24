@@ -1,7 +1,8 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro, {getCurrentInstance} from '@tarojs/taro'
+import {Component} from 'react'
 import {Image, ScrollView, Text, Video, View} from '@tarojs/components'
 import {AtButton, AtCurtain, AtFab, AtFloatLayout, AtIcon, AtMessage, AtTabs, AtTabsPane, AtToast} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import { connect } from 'react-redux'
 import MatchUp from './components/match-up'
 import NooiceBar from './components/nooice-bar'
 import GiftNotify from '../../components/gift-notify'
@@ -16,7 +17,7 @@ import payAction from "../../actions/pay";
 import depositAction from "../../actions/deposit";
 import {
   clearLoginToken,
-  formatTimeSecond,
+  formatTimeSecond, getExpInfoByExpValue,
   getStorage,
   getTimeDifference,
   hasLogin,
@@ -65,6 +66,10 @@ import ShareMoment from "../../components/share-moment";
 import ModalPay from "../../components/modal-pay";
 import MatchClip from "./components/match-clip";
 import configAction from "../../actions/config";
+import LevelUpModal from "../../components/modal-level-up";
+import NavBar from "../../components/nav-bar";
+import LeagueMember from "../../components/league-member";
+import RectFab from "../../components/fab-rect";
 
 type Bulletin = {
   id: number,
@@ -90,9 +95,11 @@ type PageStateProps = {
   commentList: any;
   danmuList: any;
   payEnabled: boolean;
+  giftEnabled: boolean;
   shareSentence: any;
   giftList: any;
   deposit: number;
+  expInfo: any;
 }
 
 type PageDispatchProps = {}
@@ -178,6 +185,10 @@ type PageState = {
   matchClips: any;
   adAvailable: boolean;
   onLineUpClick: any;
+  levelUpShow: boolean;
+  currentLevel: number;
+  leagueMemberRule: any;
+  leagueMemberOpen: boolean;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -196,15 +207,8 @@ enum LiveStatus {
 }
 
 @withShare({})
-class Live extends Component<PageOwnProps, PageState> {
-
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
+class Live extends Component<IProps, PageState> {
+  navRef = null;
   socketTask: Taro.SocketTask | null
   videoContext: Taro.VideoContext | null
   animElemIds: any = {};
@@ -215,12 +219,6 @@ class Live extends Component<PageOwnProps, PageState> {
   giftRows: any = {left: [{}, {}, {}, {}, {}], right: [{}, {}, {}, {}, {}], unset: []};
   isupdating: boolean = false;
   enterTime: any;
-
-  config: Config = {
-    navigationBarTitleText: '绝杀时刻',
-    navigationBarBackgroundColor: '#ff9900',
-    navigationBarTextStyle: 'white',
-  }
 
   constructor(props) {
     super(props)
@@ -304,6 +302,10 @@ class Live extends Component<PageOwnProps, PageState> {
       matchClips: null,
       adAvailable: false,
       onLineUpClick: null,
+      levelUpShow: false,
+      currentLevel: 0,
+      leagueMemberRule: null,
+      leagueMemberOpen: false,
     }
   }
 
@@ -354,16 +356,13 @@ class Live extends Component<PageOwnProps, PageState> {
   }
 
   componentWillMount() {
-    matchAction.getMatchInfo_clear()
-    matchAction.getMatchComment_clear()
-    liveAction.getLiveMediaList_clear()
   }
 
   componentDidMount() {
     // componentDidShow() {
     const {payEnabled} = this.props;
     if (!payEnabled) {
-      this.initPayEnable();
+      this.initPayConfig();
     }
     this.iphoneXAdjust();
     matchAction.getMatchInfo_clear()
@@ -378,6 +377,7 @@ class Live extends Component<PageOwnProps, PageState> {
       if (data.activityId) {
         if (data.leagueId) {
           this.setState({leagueId: data.leagueId});
+          this.initLeagueMember(data.leagueId);
         }
         if (data.status && data.status.status == FootballEventType.FINISH) {
           this.getLiveMediaInfo(data.activityId)
@@ -476,13 +476,23 @@ class Live extends Component<PageOwnProps, PageState> {
       }
     })
   }
+  initLeagueMember = (leagueId) => {
+    new Request().get(api.API_LEAGUE_MEMBER, {
+      leagueId: leagueId,
+    }).then((data: any) => {
+      if (data.available) {
+        this.setState({leagueMemberRule: data})
+      }
+    });
+  }
   getParamId = () => {
     let id;
-    if (this.$router.params != null) {
-      if (this.$router.params.id == null && this.$router.params.scene != null) {
-        id = this.$router.params.scene
-      } else if (this.$router.params.id != null) {
-        id = this.$router.params.id
+    const router = getCurrentInstance().router;
+    if (router && router.params != null) {
+      if (router.params.id == null && router.params.scene != null) {
+        id = router.params.scene
+      } else if (router.params.id != null) {
+        id = router.params.id
       } else {
         return null
       }
@@ -511,26 +521,36 @@ class Live extends Component<PageOwnProps, PageState> {
       }
     });
   }
-  initPayEnable = (userNo?) => {
+  initPayConfig = (userNo?) => {
     if (userNo == null && this.props.userInfo && this.props.userInfo.userNo) {
       userNo = this.props.userInfo.userNo;
     }
-    if (userNo == null) {
-      return;
-    }
-    Taro.getSystemInfo().then((systemData) => {
-      if (systemData.platform == 'android') {
-        configAction.setPayEnabled(true);
-      } else if (systemData.platform == 'ios') {
-        new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
-          if (ability && ability.enablePay) {
-            configAction.setPayEnabled(true);
+    Taro.getSystemInfo().then((systemInfo) => {
+      new Request().get(api.API_SYS_PAYMENT_CONFIG, null).then((config: any) => {
+        if (userNo) {
+          new Request().get(api.API_USER_ABILITY, {userNo: userNo}).then((ability: any) => {
+            if (ability && ability.enablePay) {
+              configAction.setPayEnabled(true);
+              configAction.setGiftEnabled(true);
+            } else {
+              if (systemInfo.platform == 'ios') {
+                configAction.setPayEnabled(config && config.enablePay ? true : false);
+              } else {
+                configAction.setPayEnabled(true);
+              }
+              configAction.setGiftEnabled(config && config.enableGift ? true : false);
+            }
+          });
+        } else {
+          if (systemInfo.platform == 'ios') {
+            configAction.setPayEnabled(config && config.enablePay ? true : false);
           } else {
-            configAction.setPayEnabled(false);
+            configAction.setPayEnabled(true);
           }
-        })
-      }
-    })
+          configAction.setGiftEnabled(config && config.enableGift ? true : false);
+        }
+      })
+    });
   }
   initSocket = async (matchId) => {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -630,7 +650,7 @@ class Live extends Component<PageOwnProps, PageState> {
           this.socketTask && this.socketTask.send({
             data: JSON.stringify(params),
             success: () => {
-              resolve();
+              resolve(null);
             },
             fail: () => {
               reject();
@@ -892,9 +912,9 @@ class Live extends Component<PageOwnProps, PageState> {
             })
           }
         })
-        new Request().get(api.API_MATCH_PLAYER_HEAT_TOTAL, {matchId: this.getParamId()}).then((data: any) => {
-          this.setState({playerHeatTotal: data})
-        })
+        // new Request().get(api.API_MATCH_PLAYER_HEAT_TOTAL, {matchId: this.getParamId()}).then((data: any) => {
+        //   this.setState({playerHeatTotal: data})
+        // })
       } else if (heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT) {
         param.leagueId = this.state.leagueId;
         this.setState({playerHeatLoading: true})
@@ -910,9 +930,9 @@ class Live extends Component<PageOwnProps, PageState> {
             })
           }
         })
-        new Request().get(api.API_LEAGUE_PLAYER_HEAT_TOTAL, {leagueId: this.state.leagueId}).then((data: any) => {
-          this.setState({playerHeatTotal: data})
-        })
+        // new Request().get(api.API_LEAGUE_PLAYER_HEAT_TOTAL, {leagueId: this.state.leagueId}).then((data: any) => {
+        //   this.setState({playerHeatTotal: data})
+        // })
       }
     });
   }
@@ -981,9 +1001,9 @@ class Live extends Component<PageOwnProps, PageState> {
             })
           }
         })
-        new Request().get(api.API_LEAGUE_TEAM_HEAT_TOTAL, {leagueId: this.state.leagueId}).then((data: any) => {
-          this.setState({leagueTeamHeatTotal: data})
-        })
+        // new Request().get(api.API_LEAGUE_TEAM_HEAT_TOTAL, {leagueId: this.state.leagueId}).then((data: any) => {
+        //   this.setState({leagueTeamHeatTotal: data})
+        // })
       }
     })
   }
@@ -1132,7 +1152,7 @@ class Live extends Component<PageOwnProps, PageState> {
       // this.setState({commentIntoView: `message-${this.props.commentList.list.length}`})
       // const commentList: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
       const commentList: Array<any> = this.getCommentsList(this.props.commentList.records);
-      // setTimeout(() => {
+      setTimeout(() => {
       if (commentList && commentList.length > 0) {
         this.setState({
           comments: commentList,
@@ -1145,18 +1165,18 @@ class Live extends Component<PageOwnProps, PageState> {
           chatLoading: false,
         })
       }
-      // }, 500)
+      }, 2000)
     })
   }
   getCommentList_next = () => {
     const commentList: Array<any> = this.getCommentsList(this.props.commentList.records);
     return new Promise((resolve, reject) => {
       if (commentList.length >= 10) {
-        resolve();
+        resolve(null);
         return;
       }
       if (this.props.commentList.current >= this.props.commentList.pages) {
-        resolve();
+        resolve(null);
         return;
       }
       this.setState({chatLoading: true})
@@ -1186,7 +1206,7 @@ class Live extends Component<PageOwnProps, PageState> {
             chatLoading: false,
           })
         }
-        resolve();
+        resolve(null);
       }, () => {
         reject();
       })
@@ -1361,7 +1381,7 @@ class Live extends Component<PageOwnProps, PageState> {
       if (res.payload != null && phone == null) {
         this.setState({phoneOpen: true})
       }
-      this.initPayEnable(res.userNo);
+      this.initPayConfig(res.userNo);
     })
     this.getUserChargeInfo(this.props.match, false);
   }
@@ -1523,12 +1543,26 @@ class Live extends Component<PageOwnProps, PageState> {
           this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
           this.state.leagueTeamHeatRefreshFunc && this.state.leagueTeamHeatRefreshFunc();
           this.getUserChargeInfo(this.props.match, false);
+        } else if (type != null && type == ORDER_TYPE.leagueMember) {
+          this.setState({needPay: false})
+          this.getUserChargeInfo(this.props.match, false);
+          this.getParamId() && this.getMatchStatus(this.getParamId());
         } else {
           this.setState({needPay: false})
           this.getUserChargeInfo(this.props.match, false);
         }
+        // this.isUserLevelUp();
       }
     });
+  }
+  isUserLevelUp = () => {
+    const level = getExpInfoByExpValue(this.props.expInfo, this.props.userInfo.userExp.exp).level
+    this.getUserInfo((userInfo) => {
+      const currentLevel = getExpInfoByExpValue(this.props.expInfo, userInfo.payload.userExp.exp).level
+      if (currentLevel >= (Math.ceil(level / 10)) * 10) {
+        this.setState({levelUpShow: true, currentLevel: currentLevel})
+      }
+    })
   }
   getCharge = (data, monopolyOnly): MatchCharge => {
     if (data.status && data.status.status == FootballEventType.FINISH) {
@@ -1842,7 +1876,8 @@ class Live extends Component<PageOwnProps, PageState> {
       tabs[TABS_TYPE.lineUp] = tabIndex;
       tabIndex = tabIndex + 1;
     }
-    return {tabList, tabs};
+    const tabKey = Object.keys(tabs).join(",");
+    return {tabList, tabs, tabKey};
   }
 
   showGiftPanel = async () => {
@@ -2123,6 +2158,43 @@ class Live extends Component<PageOwnProps, PageState> {
   bindLineUpOnClick = (onclick) => {
     this.setState({onLineUpClick: onclick})
   }
+  onLevelUpConfirm = () => {
+    this.setState({levelUpShow: false})
+  }
+  onLeagueMemberShow = () => {
+    this.setState({leagueMemberOpen: true, payOpen: false})
+  }
+  onLeagueMemberClose = () => {
+    this.setState({leagueMemberOpen: false})
+  }
+  onLeagueMemberPaySuccess = (orderId) => {
+    this.setState({leagueMemberOpen: false})
+    if (orderId) {
+      this.getOrderStatus(orderId, ORDER_TYPE.leagueMember);
+    }
+    Taro.showToast({
+      title: "开通成功",
+      icon: 'none',
+    });
+  }
+  onLeagueMemberPayError = (reason) => {
+    switch (reason) {
+      case error.ERROR_PAY_CANCEL: {
+        Taro.showToast({
+          title: "支付失败,用户取消支付",
+          icon: 'none',
+        });
+        return;
+      }
+      case error.ERROR_PAY_ERROR: {
+        Taro.showToast({
+          title: "支付失败",
+          icon: 'none',
+        });
+        return;
+      }
+    }
+  }
 
   render() {
     const {match = null, payEnabled} = this.props;
@@ -2132,10 +2204,17 @@ class Live extends Component<PageOwnProps, PageState> {
         diffTime: "00:00"
       }, liveStatus, leftNooice = 0, rightNooice = 0, teamHeats = null, playerHeats = null, topPlayerHeats = null
     } = this.state;
-    let {tabList, tabs} = this.getTabsList(match);
+    let {tabList, tabs, tabKey} = this.getTabsList(match);
 
     return (
       <View className='qz-live-content'>
+        <NavBar
+          title='绝杀时刻'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         <View className='qz-live-match__content'>
           {this.state.needPay ?
             <View className='qz-live-match__video'>
@@ -2230,7 +2309,7 @@ class Live extends Component<PageOwnProps, PageState> {
                       </View>
                       {this.state.videoShowMore ?
                         <View className="qz-live-match__video-controllers__right-item-container">
-                          {this.props.mediaList.map((item, index) => (
+                          {this.props.mediaList && this.props.mediaList.map((item, index) => (
                             <View key={item.id}
                                   className={`qz-live-match__video-controllers__right-item ${this.state.currentMedia == index ? "qz-live-match__video-controllers__right-item-selected" : ""}`}
                                   onClick={this.handleMediaFragmentClick.bind(this, index)}>
@@ -2247,19 +2326,23 @@ class Live extends Component<PageOwnProps, PageState> {
                   </View>
                 }
               </Video>)}
-          <View className='qz-live-tabs'>
+          <View className='qz-live-tabs'
+                style={{top: `calc(9 / 16 * 100vw + ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px)`}}>
             <AtTabs current={this.state.currentTab}
                     className="qz-live__top-tabs__content"
                     tabList={tabList}
-                    onClick={this.switchTab.bind(this)}>
+                    key={tabKey}
+                    onClick={this.switchTab}>
               {this.state.heatType == HEAT_TYPE.PLAYER_HEAT || this.state.heatType == HEAT_TYPE.LEAGUE_PLAYER_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatPlayer]}>
                   <HeatPlayer
+                    tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                    tabScrollStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 85px - 42px)`}}
                     matchId={this.getParamId()}
                     leagueId={this.state.leagueId}
                     heatType={this.state.heatType}
                     onPlayerHeatRefresh={this.onPlayerHeatRefresh}
-                    totalHeat={this.state.playerHeatTotal}
+                    // totalHeat={this.state.playerHeatTotal}
                     startTime={this.state.heatStartTime}
                     endTime={this.state.heatEndTime}
                     playerHeats={playerHeats}
@@ -2276,11 +2359,13 @@ class Live extends Component<PageOwnProps, PageState> {
               {this.state.heatType == HEAT_TYPE.LEAGUE_TEAM_HEAT ?
                 <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.heatLeagueTeam]}>
                   <HeatLeagueTeam
+                    tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                    tabScrollStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 85px - 42px)`}}
                     matchId={this.getParamId()}
                     leagueId={this.state.leagueId}
                     heatType={this.state.heatType}
                     onTeamHeatRefresh={this.onLeagueTeamHeatRefresh}
-                    totalHeat={this.state.leagueTeamHeatTotal}
+                    // totalHeat={this.state.leagueTeamHeatTotal}
                     topTeamHeats={this.state.topLeagueTeamHeats}
                     startTime={this.state.heatStartTime}
                     endTime={this.state.heatEndTime}
@@ -2295,9 +2380,15 @@ class Live extends Component<PageOwnProps, PageState> {
                 </AtTabsPane>
                 : null}
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.matchUp]}>
-                <ScrollView className="qz-live-match-up__scroll-content">
+                <ScrollView
+                  className="qz-live-match-up__scroll-content"
+                  style={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                >
                   {this.state.currentTab != tabs[TABS_TYPE.matchUp] ? <View/> : (
-                    <View className="qz-live-match-up__content">
+                    <View
+                      className="qz-live-match-up__content"
+                      style={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                    >
                       <MatchUp className="qz-live-match-up__match-up" matchInfo={match}
                                matchStatus={match.status}
                                onlytime={this.isThisYear(new Date(match.startTime))}
@@ -2361,6 +2452,10 @@ class Live extends Component<PageOwnProps, PageState> {
                         : null}
                       {match.type && match.type.indexOf(MATCH_TYPE.chattingRoom) != -1 &&
                       <ChattingRoom
+                        tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px)`}}
+                        tabScrollStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px - 40px)`}}
+                        tabContainerStyleIphoneX={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px - 34px)`}}
+                        tabScrollStyleIphoneX={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 104px - 44px - 20px - 40px - 34px)`}}
                         isIphoneX={this.state.isIphoneX}
                         matchInfo={this.props.match}
                         userInfo={this.props.userInfo}
@@ -2369,6 +2464,7 @@ class Live extends Component<PageOwnProps, PageState> {
                         intoView={this.state.commentIntoView}
                         sendMessage={this.sendMessage}
                         comments={this.state.comments}
+                        expInfo={this.props.expInfo}
                       />}
                     </View>
                   )}
@@ -2384,7 +2480,11 @@ class Live extends Component<PageOwnProps, PageState> {
               </AtTabsPane>}
               {match.type && match.type.indexOf(MATCH_TYPE.timeLine) != -1 &&
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.statistics]}>
-                <ScrollView scrollY className="qz-live-statistics">
+                <ScrollView
+                  scrollY
+                  className="qz-live-statistics"
+                  style={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                >
                   {this.state.currentTab != tabs[TABS_TYPE.statistics] ? <View/>
                     :
                     (
@@ -2397,9 +2497,12 @@ class Live extends Component<PageOwnProps, PageState> {
               </AtTabsPane>}
               {match.type && match.type.indexOf(MATCH_TYPE.lineUp) != -1 &&
               <AtTabsPane current={this.state.currentTab} index={tabs[TABS_TYPE.lineUp]}>
-                <LineUp matchInfo={this.props.match}
-                        hidden={this.state.currentTab != tabs[TABS_TYPE.lineUp]}
-                        bindOnClick={this.bindLineUpOnClick}
+                <LineUp
+                  tabContainerStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px)`}}
+                  tabScrollStyle={{height: `calc(100vh - (9 / 16 * 100vw) - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 38px - 5vw - 28px)`}}
+                  matchInfo={this.props.match}
+                  hidden={this.state.currentTab != tabs[TABS_TYPE.lineUp]}
+                  bindOnClick={this.bindLineUpOnClick}
                 />
               </AtTabsPane>}
             </AtTabs>
@@ -2439,7 +2542,8 @@ class Live extends Component<PageOwnProps, PageState> {
           giftRanks={this.state.giftRanks}
           loading={this.state.giftRanksLoading}
           isOpened={this.state.giftRanksOpen}
-          handleCancel={this.hideGfitRank}/>
+          handleCancel={this.hideGfitRank}
+          expInfo={this.props.expInfo}/>
         <AtCurtain
           isOpened={this.state.curtainShow}
           onClose={this.onCurtainClose}
@@ -2493,6 +2597,11 @@ class Live extends Component<PageOwnProps, PageState> {
           onCancel={this.onPayConfirmClose}
           onWechatPay={this.handleWechatConfirm}
           onDepositPay={this.handleDepositConfirm}/>
+        <LevelUpModal
+          level={this.state.currentLevel}
+          isOpened={this.state.levelUpShow}
+          handleConfirm={this.onLevelUpConfirm}
+        />
         {this.state.giftSendQueue && this.state.giftSendQueue.map((data: any) => (
           <GiftNotify
             active={data.active}
@@ -2528,6 +2637,28 @@ class Live extends Component<PageOwnProps, PageState> {
           </View>
           : null
         }
+        {this.state.payOpen && this.state.leagueMemberRule && this.state.leagueMemberRule.available ?
+          <RectFab
+            className="qz-fab-rect-single-line"
+            onClick={this.onLeagueMemberShow}
+            background="linear-gradient(90deg,#f8e2c4,#f3bb6c);"
+            top="30%"
+          >
+            <Image src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/crown.png"/>
+            <Text style={{color: "#754e19"}}>联赛会员，比赛随心看</Text>
+          </RectFab>
+          : null}
+        {this.state.leagueId ?
+          <LeagueMember
+            league={this.props.match.league}
+            isOpened={this.state.leagueMemberOpen}
+            leagueMemberRule={this.state.leagueMemberRule}
+            onClose={this.onLeagueMemberClose}
+            onHandlePaySuccess={this.onLeagueMemberPaySuccess}
+            onHandlePayError={this.onLeagueMemberPayError}
+            onPayConfirm={this.onPayConfirm}
+            onPayClose={this.onPayConfirmClose}
+          /> : null}
       </View>
     )
   }
@@ -2544,8 +2675,10 @@ const mapStateToProps = (state) => {
     commentList: state.match.comment,
     danmuList: state.match.danmu,
     payEnabled: state.config ? state.config.payEnabled : null,
+    giftEnabled: state.config ? state.config.giftEnabled : null,
     shareSentence: state.config ? state.config.shareSentence : [],
     giftList: state.pay ? state.pay.gifts : [],
+    expInfo: state.config ? state.config.expInfo : [],
   }
 }
 export default connect(mapStateToProps)(Live)

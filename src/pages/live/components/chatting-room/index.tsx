@@ -1,11 +1,10 @@
-import Taro, {Component} from '@tarojs/taro'
-// import {connect} from '@tarojs/redux'
+import {Component} from 'react'
 import {Image, ScrollView, Text, View} from '@tarojs/components'
 import {AtActivityIndicator, AtButton, AtInput} from 'taro-ui'
 import './index.scss'
 import noperson from '../../../../assets/no-person.png';
-
-// import matchAction from "../../../../actions/match";
+import * as global from "../../../../constants/global";
+import {getExpInfoByExpValue} from "../../../../utils/utils";
 
 type PageStateProps = {
   comments: [];
@@ -22,6 +21,11 @@ type PageOwnProps = {
   intoView?: string;
   sendMessage: any;
   isIphoneX: boolean;
+  expInfo: any;
+  tabContainerStyleIphoneX: any;
+  tabContainerStyle: any;
+  tabScrollStyleIphoneX: any;
+  tabScrollStyle: any;
 }
 
 type PageState = {
@@ -33,11 +37,20 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface ChattingRoom {
-  props: IProps | any;
+  props: IProps;
 }
 
-class ChattingRoom extends Component<PageOwnProps | any, PageState> {
+class ChattingRoom extends Component<IProps, PageState> {
   static defaultProps = {}
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      textInput: "",
+      scrolling: false,
+      messageSending: false,
+    }
+  }
 
   handleChatInputChange = (value) => {
     this.setState({
@@ -68,7 +81,7 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
     });
   }
   getCommentsList = (comments) => {
-    // let commentList: Array<any> = comments.sort((item1, item2) => {
+    //   let commentList: Array<any> = comments.sort((item1, item2) => {
     //   const date1 = new Date(item1.date).getTime();
     //   const date2 = new Date(item2.date).getTime();
     //   return date1 > date2 ? 1 : (date1 == date2 ? 0 : -1)
@@ -85,16 +98,21 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
   render() {
     const {comments = [], loading = false, intoView = ''} = this.props
     return (
-      <View className={`qz-chatting-room ${this.props.isIphoneX ? "qz-chatting-room-iphoneX" : ""}`}>
+      <View className='qz-chatting-room'
+            style={this.props.isIphoneX ? this.props.tabContainerStyleIphoneX : this.props.tabContainerStyle}>
         <ScrollView scrollY={loading ? false : true}
                     className="qz-chatting-room__chat-content"
+                    style={this.props.isIphoneX ? this.props.tabScrollStyleIphoneX : this.props.tabScrollStyle}
                     scrollIntoView={intoView}
                     upper-threshold={20}
                     onScrollToUpper={this.onChatScroll}>
           {loading && <View className="qz-chatting-room__loading">
             <AtActivityIndicator mode="center" content="加载中..."/>
           </View>}
-          <View className="qz-chatting-room__chat-content__container">
+          <View
+            className="qz-chatting-room__chat-content__container"
+            style={this.props.isIphoneX ? this.props.tabScrollStyleIphoneX : this.props.tabScrollStyle}
+          >
             <View className="qz-chatting-room__chat-item-hint">
               绝杀时刻禁止任何传播违法、违规、低俗等信息的行为，一经发现将予以封禁处理。请勿轻信以任何方式的私下交易等行为，以防人身或财产损失。
             </View>
@@ -128,6 +146,12 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
                       <View className="qz-chatting-room__chat-avatar-container">
                         <View className="qz-chatting-room__chat-avatar__avatar">
                           <Image src={item.user.avatar ? item.user.avatar : noperson}/>
+                          {item.user.userExp ?
+                            <View className='level'
+                                  style={{backgroundColor: global.LEVEL_COLOR[Math.floor(getExpInfoByExpValue(this.props.expInfo, item.user.userExp.exp).level / 10)]}}>
+                              Lv.{getExpInfoByExpValue(this.props.expInfo, item.user.userExp.exp).level}
+                            </View>
+                            : null}
                         </View>
                         <View className="qz-chatting-room__chat-avatar__name">
                           <Text className="qz-chatting-room__chat-avatar__name-text">
@@ -143,6 +167,12 @@ class ChattingRoom extends Component<PageOwnProps | any, PageState> {
                       <View className="qz-chatting-room__chat-avatar-container">
                         <View className="qz-chatting-room__chat-avatar__avatar">
                           <Image src={item.user.avatar ? item.user.avatar : noperson}/>
+                          {item.user.userExp ?
+                            <View className='level'
+                                  style={{backgroundColor: global.LEVEL_COLOR[Math.floor(getExpInfoByExpValue(this.props.expInfo, item.user.userExp.exp).level / 10)]}}>
+                              Lv.{getExpInfoByExpValue(this.props.expInfo, item.user.userExp.exp).level}
+                            </View>
+                            : null}
                         </View>
                         <View className="qz-chatting-room__chat-avatar__name">
                           <Text className="qz-chatting-room__chat-avatar__name-text">

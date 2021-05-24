@@ -1,4 +1,5 @@
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text, Image, ScrollView} from '@tarojs/components'
 import {AtSearchBar, AtDivider, AtButton, AtActivityIndicator, AtLoadMore} from 'taro-ui'
 
@@ -35,6 +36,8 @@ type PageOwnProps = {
   isLeague?: any;
   leagueId?: any;
   matchId?: any;
+  tabContainerStyle?: any;
+  tabScrollStyle?: any;
 }
 
 type PageState = {
@@ -61,8 +64,22 @@ const STATUS = {
   finish: 2,
 }
 
-class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
+class HeatLeagueTeam extends Component<IProps, PageState> {
   static defaultProps = {}
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      timerID_CountDown: null,
+      startDiffDayTime: null,
+      endDiffDayTime: null,
+      searchText: "",
+      currentTeamHeat: null,
+      loadingMore: false,
+      pulldownRefresh: false,
+      heatStatus: null,
+    }
+  }
 
   componentDidMount() {
     this.props.onTeamHeatRefresh && this.props.onTeamHeatRefresh(this.refresh);
@@ -209,7 +226,7 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
     this.nextPage();
   }
 
-  onPullDownRefresh() {
+  onPullDownRefresh=()=> {
     this.setState({pulldownRefresh: true})
     Taro.showLoading({title: global.LOADING_TEXT})
     this.refresh();
@@ -272,10 +289,15 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
       }
     })
   }
+  handleFeedbackClick = () => {
+    Taro.navigateTo({
+      url: "/pages/feedback/feedback",
+    })
+  }
 
   render() {
     const {startDiffDayTime, endDiffDayTime, currentTeamHeat = null, pulldownRefresh = false} = this.state
-    const {hidden = false, totalHeat} = this.props
+    const {hidden = false} = this.props
     let teamHeats = this.props.teamHeats;
     let topTeamHeats = this.props.topTeamHeats;
     let isTopTeamHeat = this.isTopTeamHeat;
@@ -287,7 +309,8 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
     }
 
     return (
-      <View className={`${this.props.isLeague ? "qz-heat-team-container-league" : "qz-heat-team-container"}`}>
+      <View className={`${this.props.isLeague ? "qz-heat-team-container-league" : "qz-heat-team-container"}`}
+            style={this.props.tabContainerStyle}>
         <View className="qz-heat-team-header">
           <View className="qz-heat-team-header__search">
             <AtSearchBar
@@ -300,24 +323,37 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
             />
           </View>
           <View className="qz-heat-team-header__status">
+            {/*<View className="qz-heat-team-header__status-feedback">*/}
+            {/*  <AtButton*/}
+            {/*    className="vertical-middle"*/}
+            {/*    size="small"*/}
+            {/*    type="primary"*/}
+            {/*    full*/}
+            {/*    circle*/}
+            {/*    onClick={this.handleFeedbackClick}*/}
+            {/*  >*/}
+            {/*    投诉与反馈*/}
+            {/*  </AtButton>*/}
+            {/*</View>*/}
             <View className="at-row">
-              <View className="at-col at-col-4">
-                <View className="w-full center qz-heat-team-header__status-title">
-                  参赛球队
-                </View>
-                <View className="w-full center qz-heat-team-header__status-value">
-                  {teamHeats && teamHeats.total ? teamHeats.total : 0}
-                </View>
-              </View>
-              <View className="at-col at-col-4">
-                <View className="w-full center qz-heat-team-header__status-title">
-                  累计人气值
-                </View>
-                <View className="w-full center qz-heat-team-header__status-value">
-                  {totalHeat ? totalHeat : 0}
-                </View>
-              </View>
-              <View className="at-col at-col-4">
+              {/*<View className="at-col at-col-4">*/}
+              {/*  <View className="w-full center qz-heat-team-header__status-title">*/}
+              {/*    参赛球队*/}
+              {/*  </View>*/}
+              {/*  <View className="w-full center qz-heat-team-header__status-value">*/}
+              {/*    {teamHeats && teamHeats.total ? teamHeats.total : 0}*/}
+              {/*  </View>*/}
+              {/*</View>*/}
+              {/*<View className="at-col at-col-4">*/}
+              {/*  <View className="w-full center qz-heat-team-header__status-title">*/}
+              {/*    累计人气值*/}
+              {/*  </View>*/}
+              {/*  <View className="w-full center qz-heat-team-header__status-value">*/}
+              {/*    {totalHeat ? totalHeat : 0}*/}
+              {/*  </View>*/}
+              {/*</View>*/}
+              {/*<View className="at-col at-col-4">*/}
+              <View className="at-col at-col-12">
                 <View className="w-full center qz-heat-team-header__status-title">
                   活动结束倒计时
                 </View>
@@ -331,7 +367,9 @@ class HeatLeagueTeam extends Component<PageOwnProps, PageState> {
           </View>
         </View>
         <AtDivider height={12} lineColor="#E5E5E5"/>
-        <ScrollView scrollY className="qz-heat-team-content"
+        <ScrollView scrollY
+                    className="qz-heat-team-content"
+                    style={this.props.tabScrollStyle}
                     upperThreshold={20}
                     lowerThreshold={20}
                     onScrollToUpper={this.onPullDownRefresh}

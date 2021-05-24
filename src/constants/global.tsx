@@ -80,6 +80,7 @@ export const ORDER_TYPE = {
   "gift": 4,
   "bet": 5,
   "deposit": 6,
+  "leagueMember": 7,
 }
 export const ORDER_STAUTS = {
   "notpaid": 0,
@@ -146,14 +147,23 @@ export const BET_TYPE = {
   FREE: 0,
   CHARGE: 1,
 }
+
 export class CacheManager {
   static instance: CacheManager;
   CACHE_ENABLED: boolean;
 
-  static getInstance() {
+  static getInstance = () => {
     if (!CacheManager.instance) {
       CacheManager.instance = new CacheManager();
     }
     return CacheManager.instance;
   }
+}
+
+export const LEVEL_COLOR = {
+  0: "#FF851B",
+  1: "#3D9970",
+  2: "#2D8CF0",
+  3: "#ff4136",
+  4: "#B10DC9",
 }

@@ -1,8 +1,8 @@
-import "taro-ui/dist/style/components/article.scss";
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {AtModal, AtModalContent, AtModalAction, AtAvatar, AtDivider} from "taro-ui"
 import {View, Text, Button, Input} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import Request from '../../utils/request'
 import {getStorage, toLogin} from '../../utils/utils'
@@ -40,6 +40,7 @@ interface SignType {
 type PageStateProps = {
   isOpened: boolean,
   payEnabled: boolean;
+  giftEnabled: boolean;
   userInfo: any;
   deposit: number;
 }
@@ -74,10 +75,10 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface ModalGift {
-  props: IProps | any;
+  props: IProps;
 }
 
-class ModalGift extends Component<PageOwnProps | any, PageState> {
+class ModalGift extends Component<IProps, PageState> {
 
   constructor(props) {
     super(props)
@@ -208,12 +209,12 @@ class ModalGift extends Component<PageOwnProps | any, PageState> {
             package: unifiedResult.packageValue,
             signType: unifiedResult.signType,
             paySign: unifiedResult.paySign,
-            success: function (res) {
+            success: (res) => {
               if (res.errMsg == "requestPayment:ok") {
                 handleConfirm(unifiedResult.orderId);
               }
             },
-            fail: function (res) {
+            fail: (res) => {
               if (res.errMsg == "requestPayment:fail cancel") {
                 handleError(error.ERROR_PAY_CANCEL);
               } else {
@@ -369,6 +370,7 @@ const mapStateToProps = (state) => {
     deposit: state.deposit.depositInfo ? state.deposit.depositInfo.deposit : 0,
     userInfo: state.user.userInfo,
     payEnabled: state.config ? state.config.payEnabled : null,
+    giftEnabled: state.config ? state.config.giftEnabled : null,
   }
 }
 export default connect(mapStateToProps)(ModalGift)

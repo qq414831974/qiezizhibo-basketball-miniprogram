@@ -1,6 +1,5 @@
-import "taro-ui/dist/style/components/article.scss";
-import Taro, {Component} from '@tarojs/taro'
-import {connect} from '@tarojs/redux'
+import {Component} from 'react'
+import {connect} from 'react-redux'
 import {View, Text, Image} from '@tarojs/components'
 import defaultLogo from '../../assets/default-logo.png'
 import './index.scss'
@@ -26,7 +25,7 @@ type PageDispatchProps = {}
 type PageOwnProps = {
   matchInfo: any;
   onClick: any | null;
-  onBetClick: any | null;
+  onBetClick?: any | null;
   className?: string | null;
   onlytime?: boolean | null;
   showRound?: boolean;
@@ -40,11 +39,16 @@ type PageState = {}
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface MatchItem {
-  props: IProps | any;
+  props: IProps;
 }
 
-class MatchItem extends Component<PageOwnProps | any, PageState> {
+class MatchItem extends Component<IProps, PageState> {
   static defaultProps = {}
+
+  constructor(props) {
+    super(props)
+    this.state = {}
+  }
 
   onItemClick = () => {
     if (this.props.matchInfo.available || this.props.forceClick) {

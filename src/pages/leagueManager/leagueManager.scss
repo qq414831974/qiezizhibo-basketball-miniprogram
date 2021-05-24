@@ -50,12 +50,17 @@
     height: 70px;
     position: fixed;
     background-color: $color-bg-orange-main;
+    padding: 0 10px;
+    box-sizing: border-box;
 
     .img {
       height: 50px;
       width: 50px;
       min-height: 50px;
       min-width: 50px;
+    }
+
+    .img-round {
       border-radius: 50%;
     }
 
@@ -64,6 +69,7 @@
       color: $color-text-base-inverse;
       text-align: center;
       margin-left: $spacing-h-md;
+      margin-right: $spacing-h-md;
     }
   }
 }
@@ -126,9 +132,10 @@
 
 .qz-league-manager-fab-betrank {
   position: fixed;
-  bottom: 20%;
-  right: 16px;
+  bottom: 35%;
+  left: 16px;
 }
+
 .qz-league-manager-fab-close {
   position: absolute;
   top: -5px;
@@ -136,6 +143,7 @@
   height: 30px;
   width: 30px;
 }
+
 .qz-league-manager-fab {
   background: $color-bg-transparent;
 
@@ -164,11 +172,23 @@
     border-radius: 5px;
   }
 }
+
+.qz-league-manager-fab-round {
+  .at-fab {
+    border-radius: 50%;
+  }
+
+  .qz-league-manager-fab-image {
+    border-radius: 50%;
+  }
+}
+
 .qz-gift-float {
-  .layout-header__title{
+  .layout-header__title {
     font-size: $font-size-sm;
     white-space: pre;
   }
+
   .at-float-layout__container {
     height: 590px;
     min-height: 590px;
@@ -188,6 +208,51 @@
     max-height: 506px;
   }
 }
+
+.qz-league-manager-heat {
+  //width: 160px;
+  padding: 4px;
+  position: relative;
+
+  .qz-league-manager-heat-title {
+    height: 20px;
+    width: 40px;
+  }
+
+  .qz-league-manager-heat-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 0;
+    color: $color-grey-2;
+  }
+
+  view {
+    margin-top: 10px;
+  }
+
+  view:first-child {
+    margin-top: 0;
+  }
+
+  .qz-league-manager-heat-items {
+    width: 120px;
+    margin-left: 20px;
+    margin-right: 30px;
+  }
+}
+
+.qz-league-manager-heat-img-overlap {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  margin-left: -10px;
+}
+
+.qz-league-manager-heat-img-overlap:first-child {
+  margin-left: 0;
+}
+
 @keyframes zoom {
   0% {
     transform: scale(1);

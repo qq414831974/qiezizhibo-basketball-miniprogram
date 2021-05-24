@@ -1,5 +1,5 @@
-import Taro, {Component, Config} from '@tarojs/taro'
-import {View,ScrollView} from '@tarojs/components'
+import {Component} from 'react'
+import {View, ScrollView} from '@tarojs/components'
 import {AtActivityIndicator, AtList, AtListItem} from 'taro-ui'
 
 import './index.scss'
@@ -14,6 +14,7 @@ type PageOwnProps = {
   playerList: any;
   loading: boolean;
   visible: boolean;
+  tabScrollStyle: any;
 }
 
 type PageState = {}
@@ -21,26 +22,20 @@ type PageState = {}
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 interface LeaguePlayerTable {
-  props: IProps | any;
+  props: IProps;
 }
 
-class LeaguePlayerTable extends Component<PageOwnProps | any, PageState> {
+class LeaguePlayerTable extends Component<IProps, PageState> {
   static defaultProps = {}
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '绝杀时刻',
-    navigationBarBackgroundColor: '#ff9900',
-    navigationBarTextStyle: 'white',
-  }
 
   constructor(props) {
     super(props)
+    this.state = {
+      leagueMatch: null,
+      playerList: null,
+      loading: false,
+      visible: false,
+    }
   }
 
   componentWillMount() {
@@ -71,7 +66,7 @@ class LeaguePlayerTable extends Component<PageOwnProps | any, PageState> {
       </View>
     }
     return (
-      <ScrollView scrollY className='qz-league-player-table__result'>
+      <ScrollView scrollY className='qz-league-player-table__result' style={this.props.tabScrollStyle}>
         <View className='qz-league-player-table__result-header'>
           <View>球员</View>
           <View>进球</View>

@@ -26,6 +26,9 @@ export const API_GET_SHARE_MOMENT_PICTURE = `${system_service}/wx/ma/picture/mom
 export const API_GET_SHARE_SENTENCE = `${system_service}/sys/share/sentence`;
 export const API_GET_SHARE_PICTURE = `${system_service}/wx/ma/picture/share`;
 export const API_GET_HEAT_COMPETITION_SHARE = `${system_service}/wx/ma/picture/heat`;
+export const API_SYS_PAYMENT_CONFIG = `${system_service}/sys/config/payment`;
+export const API_SYS_FEEDBACK = `${system_service}/sys/feedback`;
+export const API_SYS_EXP = `${system_service}/sys/exp`;
 
 //user
 export const API_LOGIN = `${auth_service}/auth`;
@@ -35,6 +38,7 @@ export const API_USER = `${user_service}/user`;
 export const API_REFRESH_TOKEN = `${auth_service}/auth/refresh_token`;
 export const API_USER_ABILITY = `${user_service}/user/ability`;
 export const API_USER_ADDRESS = `${user_service}/user/address`;
+export const API_USER_EXP = `${user_service}/user/exp`;
 
 //league
 export const API_LEAGUE = (id) => `${basketball_service}/league/${id}`;
@@ -118,6 +122,10 @@ export const API_MATCH_USER_BET = `${basketball_service}/bet`;
 export const API_MATCH_USER_BET_CASH = `${basketball_service}/bet/cash`;
 export const API_BET_RANK = `${basketball_service}/bet/rank`;
 export const API_BET_FREE = `${basketball_service}/bet/free`;
+
+//league member
+export const API_LEAGUE_MEMBER = `${basketball_service}/charge/member/league`;
+export const API_USER_LEAGUE_MEMBER = `${basketball_service}/charge/member/user`;
 
 //subscribe
 export const API_SUBSCRIBE = `${system_service}/subscribe`;

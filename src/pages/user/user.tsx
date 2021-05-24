@@ -1,14 +1,14 @@
-// import {ComponentClass} from 'react'
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text, Image, Button} from '@tarojs/components'
-import {AtAvatar, AtIcon} from 'taro-ui'
-import {connect} from '@tarojs/redux'
+import {AtIcon} from 'taro-ui'
+import {connect} from 'react-redux'
 import qqmapjs from '../../sdk/qqmap-wx-jssdk.min.js';
 import configAction from "../../actions/config";
 
 import './user.scss'
 
-import {hasLogin, getStorage, clearLoginToken} from "../../utils/utils";
+import {hasLogin, getStorage, clearLoginToken, getExpInfoByExpValue} from "../../utils/utils";
 import account_bg from '../../assets/user/account_bg.png'
 import logo from '../../assets/default-logo.png'
 import withShare from "../../utils/withShare";
@@ -20,6 +20,7 @@ import * as error from "../../constants/error";
 import ModalLocation from "../../components/modal-location";
 import LocationSelecter from "./components/location-selecter";
 import areaAction from "../../actions/area";
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {
   userInfo: {
@@ -27,9 +28,11 @@ type PageStateProps = {
     name: string,
     userNo: string,
     phone: string,
+    userExp: any,
   },
   locationConfig: any,
   payEnabled: boolean,
+  expInfo: any,
 }
 
 type PageDispatchProps = {}
@@ -56,22 +59,10 @@ interface User {
   imageUrl: logo,
   path: 'pages/home/home'
 })
-class User extends Component<PageOwnProps, PageState> {
+class User extends Component<IProps, PageState> {
 
   qqmapsdk: qqmapjs;
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '',
-    navigationBarBackgroundColor: '#ff9900',
-    navigationBarTextStyle: 'white',
-    enablePullDownRefresh: true
-  }
+  navRef: any = null;
 
   constructor(props) {
     super(props)
@@ -131,7 +122,7 @@ class User extends Component<PageOwnProps, PageState> {
   componentDidHide() {
   }
 
-  onPullDownRefresh() {
+  onPullDownRefresh = () => {
     Taro.showLoading({title: global.LOADING_TEXT})
     this.getUserInfo()
     this.initLocation();
@@ -401,21 +392,72 @@ class User extends Component<PageOwnProps, PageState> {
     }
     Taro.navigateTo({url: `../deposit/deposit`});
   }
+  onLeagueMemberClick = async () => {
+    const token = await getStorage('accessToken');
+    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+      this.setState({loginOpen: true})
+      return;
+    }
+    Taro.navigateTo({url: `../memberOrder/memberOrder`});
+  }
+  getUserExpProgress = (userExp) => {
+    const {expInfo} = this.props
+    const userExpInfo = getExpInfoByExpValue(expInfo, userExp.exp)
+    const userExpValue = userExp.exp;
+    const expMin = userExpInfo.minExp;
+    const expMax = userExpInfo.maxExp;
+    const expRange = expMax - expMin;
+    const userExpOffset = userExpValue - expMin;
+    return userExpOffset * 100 / expRange;
+  }
 
   render() {
-    const {userInfo, locationConfig, payEnabled} = this.props
-    const {avatar = logo, name = null} = userInfo;
+    const {userInfo, locationConfig, payEnabled, expInfo} = this.props
+    const {avatar = logo, name = null, userExp = {}} = userInfo;
+    const userExpInfo = getExpInfoByExpValue(expInfo, userExp.exp);
+
     return (
       <View className='qz-user-content'>
-        <Image className='qz-user-account-bg' src={account_bg}/>
+        <NavBar
+          title=''
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
+        <Image className='qz-user-account-bg'
+               style={{top: `${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px`}}
+               src={account_bg}/>
         <View className='qz-user-user-info' onClick={this.login}>
-          <AtAvatar className='avatar' circle image={avatar}/>
+          <View className='qz-user-user-info-avatar-container'>
+            <Image className='qz-user-user-info-avatar' src={avatar}/>
+            {userExp && userExpInfo ?
+              <View className='qz-user-user-info-level'
+                    style={{backgroundColor: global.LEVEL_COLOR[Math.floor(userExpInfo.level / 10)]}}>
+                Lv.{userExpInfo.level}
+              </View>
+              : null}
+          </View>
           {
             name && name.length > 0 ?
-              <Text className='username'>{name}</Text>
+              <Text className='qz-user-user-info-username'>{name}</Text>
               :
-              <Text className='username'>点击登录</Text>
+              <Text className='qz-user-user-info-username'>点击登录</Text>
           }
+        </View>
+        <View className='qz_user-info-exp'>
+          {userExp && userExpInfo ? <View className='exp-bar-controller'>
+              {/*<View className='exp-level exp-level-pre'>*/}
+              {/*  Lv.{userExp.expInfo.level}*/}
+              {/*</View>*/}
+              <View className='exp-bar'>
+                <View className='bar' style={{width: this.getUserExpProgress(userExp) + "%"}}>
+                </View>
+              </View>
+              {/*<View className='exp-level exp-level-next'>*/}
+              {/*  Lv.{userExp.expInfo.level + 1}*/}
+        {/*</View>*/}
+            </View>
+            : null}
         </View>
         <View className='qz-user-info-view'>
           {/*<View className='bio'>111</View>*/}
@@ -439,17 +481,26 @@ class User extends Component<PageOwnProps, PageState> {
             </View>
             <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
           </Button>
-          <Button onClick={this.onBetClick} className='list button-list'>
+          {payEnabled ? <Button onClick={this.onBetClick} className='list button-list'>
             <View className='list_title'>
               <AtIcon className='list-title-icon' value='shopping-bag' size='18' color='#333'/>
-              {payEnabled ? "我的竞猜" : "我的竞猜"}
+                我的竞猜
             </View>
             <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
           </Button>
-          <Button onClick={this.onDepositClick} className='list button-list'>
+            : null}
+          {payEnabled ? <Button onClick={this.onDepositClick} className='list button-list'>
             <View className='list_title'>
               <AtIcon className='list-title-icon' value='money' size='18' color='#333'/>
-              {payEnabled ? "我的绝杀币" : "我的绝杀币"}
+              我的绝杀币
+            </View>
+            <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
+          </Button>
+            : null}
+          <Button onClick={this.onLeagueMemberClick} className='list button-list'>
+            <View className='list_title'>
+              <AtIcon className='list-title-icon' value='sketch' size='18' color='#333'/>
+              我的联赛会员
             </View>
             <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
           </Button>
@@ -526,6 +577,7 @@ class User extends Component<PageOwnProps, PageState> {
 const mapStateToProps = (state) => {
   return {
     userInfo: state.user.userInfo,
+    expInfo: state.config ? state.config.expInfo : null,
     locationConfig: state.config ? state.config.locationConfig : null,
     payEnabled: state.config ? state.config.payEnabled : null,
   }

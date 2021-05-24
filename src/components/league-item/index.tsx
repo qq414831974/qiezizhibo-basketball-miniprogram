@@ -1,6 +1,4 @@
-import "taro-ui/dist/style/components/article.scss";
-
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text, Image} from '@tarojs/components'
 import defaultLogo from '../../assets/default-logo.png'
 import defaultPoster from '../../assets/default-poster.jpg'
@@ -13,7 +11,7 @@ type PageDispatchProps = {}
 
 type PageOwnProps = {
   leagueInfo: any;
-  onClick: any | null;
+  onClick?: any | null;
   pictureOnly?: boolean | null;
   withoutName?: boolean | null;
 }
@@ -26,8 +24,13 @@ interface LeagueItem {
   props: IProps;
 }
 
-class LeagueItem extends Component<PageOwnProps, PageState> {
+class LeagueItem extends Component<IProps, PageState> {
   static defaultProps = {}
+
+  constructor(props) {
+    super(props)
+    this.state = {}
+  }
 
   getDateString = (leagueInfo) => {
     const now = new Date();

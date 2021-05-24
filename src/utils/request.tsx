@@ -56,11 +56,11 @@ export default class Request {
     return request({url, payload, showLoading, autoLogin})
   }
 
-  post(url: string, payload: Object, showLoading?: boolean, autoLogin?: boolean) {
+  post(url: string, payload: any, showLoading?: boolean, autoLogin?: boolean) {
     return request({url, payload, method: 'POST', showLoading, autoLogin})
   }
 
-  put(url: string, payload: Object, showLoading?: boolean, autoLogin?: boolean) {
+  put(url: string, payload: any, showLoading?: boolean, autoLogin?: boolean) {
     return request({url, payload, method: 'PUT', showLoading, autoLogin})
   }
 
@@ -75,6 +75,7 @@ const refreshAuth = async (refreshToken) => {
       updateStorage(res);
       return res;
     }).catch(async (error) => {
+      console.log(error)
       await updateStorage({})
     });
 }
@@ -111,8 +112,8 @@ const request = async (options) => {
                   updateRefreshing(false);
                   delete options.autoLogin;
                   //重新请求
-                  request(options).then((res: any) => {
-                    resolve(res)
+                  request(options).then((reRequest: any) => {
+                    resolve(reRequest)
                   })
                 }).catch(async (error) => {
                   await updateStorage({})
@@ -126,8 +127,8 @@ const request = async (options) => {
                     clearInterval(refreshingInterval[refreshingIntervalKey])
                     delete options.autoLogin;
                     //重新请求
-                    request(options).then((res: any) => {
-                      resolve(res)
+                    request(options).then((reRequest: any) => {
+                      resolve(reRequest)
                     })
                   }
                 }, 100)

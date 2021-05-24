@@ -1,4 +1,5 @@
-import Taro, {Component} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text, Image, ScrollView} from '@tarojs/components'
 import {AtSearchBar, AtDivider, AtButton, AtActivityIndicator, AtLoadMore} from 'taro-ui'
 import RoundButton from '../../components/round-button'
@@ -36,6 +37,8 @@ type PageOwnProps = {
   isLeauge?: any;
   leagueId?: any;
   matchId?: any;
+  tabContainerStyle?: any;
+  tabScrollStyle?: any;
 }
 
 type PageState = {
@@ -62,8 +65,22 @@ const STATUS = {
   finish: 2,
 }
 
-class HeatPlayer extends Component<PageOwnProps, PageState> {
+class HeatPlayer extends Component<IProps, PageState> {
   static defaultProps = {}
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      timerID_CountDown: null,
+      startDiffDayTime: null,
+      endDiffDayTime: null,
+      searchText: "",
+      currentPlayerHeat: null,
+      loadingMore: false,
+      pulldownRefresh: false,
+      heatStatus: null,
+    }
+  }
 
   componentDidMount() {
     this.props.onPlayerHeatRefresh && this.props.onPlayerHeatRefresh(this.refresh);
@@ -77,11 +94,11 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
 
   refresh = (first?) => {
     this.props.onGetPlayerHeatInfo(1, 40, this.state.searchText).then((res) => {
-      if(first){
-      this.setState({currentPlayerHeat: res[0]},()=>{
+      if (first) {
+        this.setState({currentPlayerHeat: res[0]}, () => {
         this.refreshCurrentPlayer();
       })
-      }else{
+      } else {
         this.refreshCurrentPlayer();
       }
     });
@@ -210,7 +227,7 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     this.nextPage();
   }
 
-  onPullDownRefresh() {
+  onPullDownRefresh = ()=> {
     this.setState({pulldownRefresh: true})
     Taro.showLoading({title: global.LOADING_TEXT})
     this.refresh();
@@ -269,10 +286,15 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
       }
     })
   }
+  handleFeedbackClick = () => {
+    Taro.navigateTo({
+      url: "/pages/feedback/feedback",
+    })
+  }
 
   render() {
     const {startDiffDayTime, endDiffDayTime, currentPlayerHeat = null, pulldownRefresh = false} = this.state
-    const {hidden = false, heatType, totalHeat} = this.props
+    const {hidden = false, heatType} = this.props
     let playerHeats = this.props.playerHeats;
     let topPlayerHeats = this.props.topPlayerHeats;
     let isTopPlayerHeat = this.isTopPlayerHeat;
@@ -284,7 +306,8 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
     }
 
     return (
-      <View className={`${this.props.isLeauge ? "qz-heat-player-container-league" : "qz-heat-player-container"}`}>
+      <View className={`${this.props.isLeauge ? "qz-heat-player-container-league" : "qz-heat-player-container"}`}
+            style={this.props.tabContainerStyle}>
         <View className="qz-heat-player-header">
           <View className="qz-heat-player-header__search">
             <AtSearchBar
@@ -297,24 +320,37 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
             />
           </View>
           <View className="qz-heat-player-header__status">
+            {/*<View className="qz-heat-player-header__status-feedback">*/}
+            {/*  <AtButton*/}
+            {/*    className="vertical-middle"*/}
+            {/*    size="small"*/}
+            {/*    type="primary"*/}
+            {/*    full*/}
+            {/*    circle*/}
+            {/*    onClick={this.handleFeedbackClick}*/}
+            {/*  >*/}
+            {/*    投诉与反馈*/}
+            {/*  </AtButton>*/}
+            {/*</View>*/}
             <View className="at-row">
-              <View className="at-col at-col-4">
-                <View className="w-full center qz-heat-player-header__status-title">
-                  参赛选手
-                </View>
-                <View className="w-full center qz-heat-player-header__status-value">
-                  {playerHeats && playerHeats.total ? playerHeats.total : 0}
-                </View>
-              </View>
-              <View className="at-col at-col-4">
-                <View className="w-full center qz-heat-player-header__status-title">
-                  累计人气值
-                </View>
-                <View className="w-full center qz-heat-player-header__status-value">
-                  {totalHeat ? totalHeat : 0}
-                </View>
-              </View>
-              <View className="at-col at-col-4">
+              {/*<View className="at-col at-col-4">*/}
+              {/*  <View className="w-full center qz-heat-player-header__status-title">*/}
+              {/*    参赛选手*/}
+              {/*  </View>*/}
+              {/*  <View className="w-full center qz-heat-player-header__status-value">*/}
+              {/*    {playerHeats && playerHeats.total ? playerHeats.total : 0}*/}
+              {/*  </View>*/}
+              {/*</View>*/}
+              {/*<View className="at-col at-col-4">*/}
+              {/*  <View className="w-full center qz-heat-player-header__status-title">*/}
+              {/*    累计人气值*/}
+              {/*  </View>*/}
+              {/*  <View className="w-full center qz-heat-player-header__status-value">*/}
+              {/*    {totalHeat ? totalHeat : 0}*/}
+              {/*  </View>*/}
+              {/*</View>*/}
+              {/*<View className="at-col at-col-4">*/}
+              <View className="at-col at-col-12">
                 <View className="w-full center qz-heat-player-header__status-title">
                   活动结束倒计时
                 </View>
@@ -328,7 +364,9 @@ class HeatPlayer extends Component<PageOwnProps, PageState> {
           </View>
         </View>
         <AtDivider height={12} lineColor="#E5E5E5"/>
-        <ScrollView scrollY className="qz-heat-player-content"
+        <ScrollView scrollY
+                    className="qz-heat-player-content"
+                    style={this.props.tabScrollStyle}
                     upperThreshold={20}
                     lowerThreshold={20}
                     onScrollToUpper={this.onPullDownRefresh}

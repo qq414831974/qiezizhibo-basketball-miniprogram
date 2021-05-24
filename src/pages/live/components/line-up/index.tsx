@@ -1,4 +1,4 @@
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, ScrollView, Text, Image, Picker} from '@tarojs/components'
 import {AtSegmentedControl, AtActivityIndicator} from 'taro-ui'
 import './index.scss'
@@ -18,6 +18,8 @@ type PageOwnProps = {
   matchInfo: any;
   hidden: any;
   bindOnClick: any;
+  tabContainerStyle?: any;
+  tabScrollStyle?: any;
 }
 
 type PageState = {
@@ -36,7 +38,7 @@ interface LineUp {
   props: IProps;
 }
 
-class LineUp extends Component<PageOwnProps, PageState> {
+class LineUp extends Component<IProps, PageState> {
   static defaultProps = {}
 
   constructor(props) {
@@ -131,7 +133,7 @@ class LineUp extends Component<PageOwnProps, PageState> {
       return <View/>
     }
     return (
-      <View className="qz-lineup">
+      <View className="qz-lineup" style={this.props.tabContainerStyle}>
         {matchInfo.againstTeams && Object.keys(matchInfo.againstTeams).length > 1 && <Picker
           className="h-full center"
           mode='selector'
@@ -148,7 +150,7 @@ class LineUp extends Component<PageOwnProps, PageState> {
           onClick={this.handleClick}
           current={this.state.current}
         />
-        <ScrollView scrollY className="qz-lineup-scroll-content">
+        <ScrollView scrollY className="qz-lineup-scroll-content" style={this.props.tabScrollStyle}>
           {loading ?
             <View className="qz-lineup-content-loading"><AtActivityIndicator mode="center" content="加载中..."/></View>
             :

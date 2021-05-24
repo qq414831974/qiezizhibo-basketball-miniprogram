@@ -1,7 +1,7 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import {Component} from 'react'
 import {View} from '@tarojs/components'
 import {AtLoadMore, AtTabs, AtTabsPane} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import './betOrders.scss'
 import MatchList from "./components/match-list";
@@ -9,6 +9,7 @@ import Request from "../../utils/request";
 import * as api from "../../constants/api";
 import {getStorage} from "../../utils/utils";
 import {BET_STATUS} from "../../constants/global";
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {
   userInfo: any;
@@ -35,19 +36,21 @@ interface BetOrders {
   props: IProps;
 }
 
-class BetOrders extends Component<PageOwnProps, PageState> {
+class BetOrders extends Component<IProps, PageState> {
+  navRef: any = null;
 
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '我的竞猜',
-    navigationBarBackgroundColor: '#ff9900',
-    navigationBarTextStyle: 'white',
+  constructor(props) {
+    super(props)
+    this.state = {
+      loading: false,
+      total: 0,
+      current: 0,
+      orderList: [],
+      addressLoading: false,
+      address: null,
+      currentTab: 0,
+      status: [],
+    }
   }
 
   componentWillMount() {
@@ -113,7 +116,7 @@ class BetOrders extends Component<PageOwnProps, PageState> {
   }
 
   // 小程序上拉加载
-  onReachBottom() {
+  onReachBottom = () => {
     this.nextPage();
   }
 
@@ -154,6 +157,13 @@ class BetOrders extends Component<PageOwnProps, PageState> {
 
     return (
       <View className='qz-orders-content'>
+        <NavBar
+          title='我的竞猜'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         <AtTabs current={this.state.currentTab}
                 tabList={[{title: '全部'}, {title: '竞猜中'}, {title: '已结束'}, {title: '已猜中'}]}
                 onClick={this.switchTab}>

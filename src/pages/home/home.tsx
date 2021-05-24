@@ -1,6 +1,7 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro, {getCurrentInstance} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Text, Button, Image, Swiper, SwiperItem, Navigator, ScrollView} from '@tarojs/components'
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 import {AtNoticebar, AtIcon, AtCurtain, AtLoadMore} from 'taro-ui'
 import NavigationBar from './components/navigation-search-bar'
 import qqmapjs from '../../sdk/qqmap-wx-jssdk.min.js';
@@ -20,6 +21,7 @@ import withShare from "../../utils/withShare";
 import Request from '../../utils/request'
 import * as api from "../../constants/api";
 import {getStorage} from "../../utils/utils";
+import NavBar from "../../components/nav-bar";
 
 // import {getStorage, hasLogin} from "../../utils/utils";
 
@@ -42,6 +44,7 @@ type PageStateProps = {
   locationConfig: any,
   areaList: any,
   userInfo: any;
+  expInfo: any;
 }
 
 type PageDispatchProps = {}
@@ -64,30 +67,18 @@ interface Home {
   props: IProps | any;
 }
 
-@withLogin("willMount")
+@withLogin("didMount")
 @withShare({})
-class Home extends Component<PageOwnProps, PageState> {
+class Home extends Component<IProps, PageState> {
   static defaultProps = {
     config: {},
     bannerConfig: [],
     wechatConfig: {},
     locationConfig: null,
   }
+  navRef: any = null;
   bulletinIndex: number = 0;
   qqmapsdk: qqmapjs;
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '绝杀时刻',
-    navigationBarBackgroundColor: '#ff9900',
-    navigationBarTextStyle: 'white',
-    disableScroll: true,
-  }
 
   constructor(props) {
     super(props)
@@ -103,7 +94,7 @@ class Home extends Component<PageOwnProps, PageState> {
   }
 
   $loginCallback = () => {
-    this.initBulletin();
+    this.initPayConfig();
   }
 
   componentWillMount() {
@@ -114,16 +105,19 @@ class Home extends Component<PageOwnProps, PageState> {
     this.getAreas();
     configAction.setVisit();
     configAction.getShareSentence();
-    if (this.$router.params.id && this.$router.params.page) {
-      let url = '/pages/' + this.$router.params.page + '/' + this.$router.params.page + '?id=' + this.$router.params.id;
+    configAction.getExpInfo();
+    this.initBulletin();
+    const router = getCurrentInstance().router;
+    if (router && router.params && router.params.id && router.params.page) {
+      let url = '/pages/' + router.params.page + '/' + router.params.page + '?id=' + router.params.id;
       Taro.navigateTo({
         url: url,
         fail: () => {
           Taro.switchTab({url: url})
         }
       })
-    } else if (this.$router.params.page) {
-      let url = '/pages/' + this.$router.params.page + '/' + this.$router.params.page;
+    } else if (router && router.params && router.params.page) {
+      let url = '/pages/' + router.params.page + '/' + router.params.page;
       Taro.navigateTo({
         url: url,
         fail: () => {
@@ -162,6 +156,35 @@ class Home extends Component<PageOwnProps, PageState> {
   componentDidHide() {
   }
 
+  initPayConfig = () => {
+    Taro.getSystemInfo().then((systemInfo) => {
+      new Request().get(api.API_SYS_PAYMENT_CONFIG, null).then(async (config: any) => {
+        const userNo = await getStorage('userNo');
+        if ((this.props.userInfo && this.props.userInfo.userNo) || userNo) {
+          new Request().get(api.API_USER_ABILITY, {userNo: userNo ? userNo : this.props.userInfo.userNo}).then((ability: any) => {
+            if (ability && ability.enablePay) {
+              configAction.setPayEnabled(true);
+              configAction.setGiftEnabled(true);
+            } else {
+              if (systemInfo.platform == 'ios') {
+                configAction.setPayEnabled(config && config.enablePay ? true : false);
+              } else {
+                configAction.setPayEnabled(true);
+              }
+              configAction.setGiftEnabled(config && config.enableGift ? true : false);
+            }
+          });
+        } else {
+          if (systemInfo.platform == 'ios') {
+            configAction.setPayEnabled(config && config.enablePay ? true : false);
+          } else {
+            configAction.setPayEnabled(true);
+          }
+          configAction.setGiftEnabled(config && config.enableGift ? true : false);
+        }
+      })
+    });
+  }
   initBulletin = () => {
     configAction.getBulletinConfig({
       province: this.props.locationConfig && this.props.locationConfig.province != '全国' ? this.props.locationConfig.province : null,
@@ -171,34 +194,6 @@ class Home extends Component<PageOwnProps, PageState> {
         this.setCurtain();
         this.setBulletin(this.bulletinIndex);
         this.startTimer_bulletin();
-        Taro.getSystemInfo().then(async (systemData) => {
-          if (systemData.platform == 'android') {
-            configAction.setPayEnabled(true);
-            //android
-          } else if (systemData.platform == 'ios') {
-            const list = data.map(item => item.content)
-            // } else {
-            const weihu = list && list.length > 0 && (list.includes("升级维护中") || list.includes("因政策调整，iOS支付暂不可用"));
-            if (weihu) {
-              const userNo = await getStorage('userNo');
-              if ((this.props.userInfo && this.props.userInfo.userNo) || userNo) {
-                new Request().get(api.API_USER_ABILITY, {userNo: userNo ? userNo : this.props.userInfo.userNo}).then((ability: any) => {
-                  if (ability && ability.enablePay) {
-                    configAction.setPayEnabled(true);
-                  } else {
-                    configAction.setPayEnabled(false);
-                  }
-                })
-              } else {
-                configAction.setPayEnabled(false);
-              }
-            } else {
-              configAction.setPayEnabled(true);
-            }
-          }
-        })
-      }else {
-        configAction.setPayEnabled(true);
       }
     });
   }
@@ -288,7 +283,7 @@ class Home extends Component<PageOwnProps, PageState> {
   }
 
   // 小程序上拉加载
-  onReachBottom() {
+  onReachBottom = () => {
     this.nextPage();
   }
 
@@ -393,6 +388,16 @@ class Home extends Component<PageOwnProps, PageState> {
       }
     }
   }
+  getBannerTop = () => {
+    let top = 84;
+    if (this.state.bulletin && this.state.bulletin.content) {
+      top = 84 + 30;
+    }
+    if (this.navRef != null && this.navRef.state.configStyle.navHeight) {
+      top = top + this.navRef.state.configStyle.navHeight;
+    }
+    return top;
+  }
 
   render() {
     const {locationConfig} = this.props
@@ -404,6 +409,13 @@ class Home extends Component<PageOwnProps, PageState> {
       loadingmoreStatus = "noMore"
     }
     return (
+      <View>
+        <NavBar
+          title='绝杀时刻'
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
       <ScrollView scrollY onScrollToLower={this.onReachBottom} className='qz-home-content'>
         <View className='qz-home-top'>
           {this.state.bulletin && this.state.bulletin.content ?
@@ -424,7 +436,9 @@ class Home extends Component<PageOwnProps, PageState> {
           <View className='qz-home-content-bg-bottom'/>
         </View>
         <View
-          className={`qz-home-banner ${this.state.bulletin && this.state.bulletin.content ? "qz-home-banner__s_n" : "qz-home-banner_s"}`}>
+            className='qz-home-banner'
+            style={{paddingTop: `${this.getBannerTop()}rpx`}}
+          >
           <Swiper
             className='qz-home-banner__swiper'
             indicatorColor='#999'
@@ -520,6 +534,7 @@ class Home extends Component<PageOwnProps, PageState> {
           />
         </AtCurtain>
       </ScrollView>
+      </View>
     )
   }
 }
@@ -531,9 +546,10 @@ const mapStateToProps = (state) => {
     wechatConfig: state.config ? state.config.wechatConfig : {},
     locationConfig: state.config ? state.config.locationConfig : null,
     bulletinConfig: state.config ? state.config.bulletinConfig : null,
-    areaList: state.area ? state.area.areas : {},
+    areaList: state.area ? state.area.areas : [],
     shareSentence: state.config ? state.config.shareSentence : [],
     userInfo: state.user.userInfo,
+    expInfo: state.config ? state.config.expInfo : [],
   }
 }
 export default connect(mapStateToProps)(Home)

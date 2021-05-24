@@ -39,7 +39,7 @@
     background-color: $color_warning;
     border-radius: $border-radius-md;
     padding: $spacing-v-xxs $spacing-v-xs;
-
+    z-index: 1;
     &-user {
       display: flex;
       align-items: center;

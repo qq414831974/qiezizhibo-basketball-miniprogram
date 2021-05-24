@@ -1,13 +1,15 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro, {getCurrentInstance} from '@tarojs/taro'
+import {Component} from 'react'
 import {View, Image} from '@tarojs/components'
 import {AtActivityIndicator} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 import defaultLogo from '../../assets/default-logo.png'
 
 import './series.scss'
 import LeagueItem from "../../components/league-item";
 import leagueAction from "../../actions/league";
 import withShare from "../../utils/withShare";
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {
   leagueList: any;
@@ -32,20 +34,18 @@ interface Series {
 }
 
 @withShare({})
-class Series extends Component<PageOwnProps, PageState> {
+class Series extends Component<IProps, PageState> {
+  navRef: any = null;
 
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '绝杀时刻',
-    navigationBarBackgroundColor: '#ff9900',
-    navigationBarTextStyle: 'white',
+  constructor(props) {
+    super(props)
+    this.state = {
+      searchText: "",
+      loadingmore: false,
+      loading: false,
   }
+  }
+
   $setSharePath = () => `/pages/home/home?id=${this.getParamId()}&page=series`
 
   componentWillMount() {
@@ -64,15 +64,18 @@ class Series extends Component<PageOwnProps, PageState> {
 
   componentDidHide() {
   }
-  getParamId = () =>{
+
+  getParamId = () => {
     let id;
-    if(this.$router.params){
-      if(this.$router.params.id == null){
-        id = this.$router.params.scene
-      }else{
-        id = this.$router.params.id
+    const router = getCurrentInstance().router;
+
+    if (router && router.params) {
+      if (router.params.id == null) {
+        id = router.params.scene
+      } else {
+        id = router.params.id
       }
-    }else{
+    } else {
       return null;
     }
     return id;
@@ -103,6 +106,13 @@ class Series extends Component<PageOwnProps, PageState> {
 
     return (
       <View className='qz-series-content'>
+        <NavBar
+          title='绝杀时刻'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         <View className='qz-series-content-header'>
           {league &&
           <View className='qz-series-content-header-container'>

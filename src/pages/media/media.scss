@@ -1,4 +1,4 @@
-@import "~taro-ui/dist/style/components/article.scss";
+@import '../../app.scss';
 
 .qz-media-container {
   width: 100%;
@@ -9,7 +9,7 @@
   width: 100vw;
   height: 9 / 16 * 100vw;
   position: fixed;
-  top: 0;
+  //top: 0;
   left: 0;
 }
 .qz-media__info {

@@ -1,6 +1,4 @@
 @import '../../app.scss';
-@import "~taro-ui/dist/style/components/flex.scss";
-@import "~taro-ui/dist/style/components/tabs.scss";
 
 .qz-bet-content {
   width: 100%;
@@ -235,10 +233,18 @@
     &-item {
       width: 100%;
 
-      view {
+      &-view {
         font-size: $font-size-base;
         color: $color-text-paragraph;
         background-color: $color-bg-lighter;
+        text-align: center;
+        padding: 10px 0;
+        margin-bottom: 10px;
+      }
+      &-view-hover {
+        font-size: $font-size-base;
+        color: $color-text-base-inverse;
+        background-color: $color-bg-orange-main;
         text-align: center;
         padding: 10px 0;
         margin-bottom: 10px;

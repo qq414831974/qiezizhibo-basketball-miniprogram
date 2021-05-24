@@ -1,13 +1,14 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import {Component} from 'react'
 import {View} from '@tarojs/components'
 import {AtLoadMore} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import './orders.scss'
 import MatchList from "./components/match-list";
 import Request from "../../utils/request";
 import * as api from "../../constants/api";
 import {getStorage} from "../../utils/utils";
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {}
 
@@ -28,19 +29,17 @@ interface Orders {
   props: IProps;
 }
 
-class Orders extends Component<PageOwnProps, PageState> {
+class Orders extends Component<IProps, PageState> {
+  navRef: any = null;
 
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '已购比赛',
-    navigationBarBackgroundColor: '#ff9900',
-    navigationBarTextStyle: 'white',
+  constructor(props) {
+    super(props)
+    this.state = {
+      loading: false,
+      total: 0,
+      current: 0,
+      orderList: [],
+    }
   }
 
   componentWillMount() {
@@ -93,7 +92,7 @@ class Orders extends Component<PageOwnProps, PageState> {
   }
 
   // 小程序上拉加载
-  onReachBottom() {
+  onReachBottom = () => {
     this.nextPage();
   }
 
@@ -108,6 +107,13 @@ class Orders extends Component<PageOwnProps, PageState> {
 
     return (
       <View className='qz-orders-content'>
+        <NavBar
+          title='已购比赛'
+          back
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
         {orderList && orderList.length > 0 ? (
           <MatchList
             matchList={orderList}/>

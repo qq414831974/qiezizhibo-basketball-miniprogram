@@ -1,7 +1,8 @@
-import Taro, {Component, Config} from '@tarojs/taro'
+import Taro from '@tarojs/taro'
+import {Component} from 'react'
 import {View} from '@tarojs/components'
 import {AtSearchBar, AtTabs, AtTabsPane} from "taro-ui"
-import {connect} from '@tarojs/redux'
+import {connect} from 'react-redux'
 
 import './match.scss'
 import MatchList from "./components/match-list";
@@ -9,6 +10,7 @@ import withShare from "../../utils/withShare";
 import * as global from "../../constants/global";
 import * as api from "../../constants/api";
 import Request from '../../utils/request'
+import NavBar from "../../components/nav-bar";
 
 type PageStateProps = {
   locationConfig: { city: string, province: string }
@@ -30,21 +32,9 @@ type PageState = {
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
 
 @withShare({})
-class Match extends Component<PageOwnProps, PageState> {
+class Match extends Component<IProps, PageState> {
 
-  /**
-   * 指定config的类型声明为: Taro.Config
-   *
-   * 由于 typescript 对于 object 类型推导只能推出 Key 的基本类型
-   * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
-   * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
-   */
-  config: Config = {
-    navigationBarTitleText: '绝杀时刻',
-    navigationBarBackgroundColor: '#ff9900',
-    navigationBarTextStyle: 'white',
-    enablePullDownRefresh: true
-  }
+  navRef: any = null;
 
   constructor(props) {
     super(props)
@@ -57,6 +47,7 @@ class Match extends Component<PageOwnProps, PageState> {
       matchList: {},
     }
   }
+
   $setSharePath = () => `/pages/home/home?page=match`
 
   componentWillMount() {
@@ -84,7 +75,7 @@ class Match extends Component<PageOwnProps, PageState> {
   componentDidHide() {
   }
 
-  onPullDownRefresh() {
+  onPullDownRefresh = () => {
     Taro.showLoading({title: global.LOADING_TEXT})
     this.getMatchList();
     Taro.stopPullDownRefresh();
@@ -179,7 +170,7 @@ class Match extends Component<PageOwnProps, PageState> {
 
 
   // 小程序上拉加载
-  onReachBottom() {
+  onReachBottom = () => {
     this.nextPage(this.state.currentTab);
   }
 
@@ -202,7 +193,12 @@ class Match extends Component<PageOwnProps, PageState> {
 
     return (
       <View className='qz-match-scroll-content'>
-        <View className='qz-match-content'>
+        <NavBar
+          title='绝杀时刻'
+          ref={ref => {
+            this.navRef = ref;
+          }}
+        />
           <View className='qz-match-content-search' onClick={this.onSearchClick}>
             <AtSearchBar
               value={this.state.searchText}
@@ -211,6 +207,7 @@ class Match extends Component<PageOwnProps, PageState> {
               className='qz-match-content-search-bar'
             />
           </View>
+        <View className='qz-match-content'>
           <View className='qz-match-tabs'>
             <AtTabs current={this.state.currentTab}
                     className="qz-match__top-tabs__content qz-custom-tabs qz-match__top-tabs__content--fixed"

@@ -1,4 +1,4 @@
-import Taro, {Component} from '@tarojs/taro'
+import {Component} from 'react'
 import {AtAvatar, AtIcon} from "taro-ui"
 import {View, Text, Image} from '@tarojs/components'
 
@@ -39,8 +39,13 @@ interface MatchUp {
   props: IProps;
 }
 
-class MatchUp extends Component<PageOwnProps, PageState> {
+class MatchUp extends Component<IProps, PageState> {
   static defaultProps = {}
+
+  constructor(props) {
+    super(props)
+    this.state = {}
+  }
 
   onItemClick = () => {
     // if (this.props.matchInfo.activityId) {
@@ -82,7 +87,7 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                     </Text>
                     <Text
                       className="qz-match-item__vs-match-score">
-                      {matchStatus && matchStatus.status == -1 ? "VS" : (matchStatus ? matchStatus.score[Object.keys(matchInfo.againstTeams)[0]] : "0-0")}
+                      {matchStatus && matchStatus.status == -1 ? "VS" : (matchStatus && matchStatus.score != null ? matchStatus.score[Object.keys(matchInfo.againstTeams)[0]] : "0-0")}
                     </Text>
                     {matchInfo.round != null ?
                       <Text className='qz-match-up-item__vs-match-round'>
@@ -104,9 +109,10 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                         </Text>
                         <View className='qz-match-up-item__vs-match-monopoly'>
                           <Image className='avatar'
-                                 src={matchInfo.monopolyUser.avatar ? matchInfo.monopolyUser.avatar : defaultLogo}/>
-                          <Text className={matchInfo.monopolyUser.name.length >= 7 ? 'text-small' : "text"}>
-                            {matchInfo.monopolyUser.name}
+                                 src={matchInfo.monopolyUser && matchInfo.monopolyUser.avatar ? matchInfo.monopolyUser.avatar : defaultLogo}/>
+                          <Text
+                            className={matchInfo.monopolyUser && matchInfo.monopolyUser.name && matchInfo.monopolyUser.name.length >= 7 ? 'text-small' : "text"}>
+                            {matchInfo.monopolyUser ? matchInfo.monopolyUser.name : "匿名"}
                           </Text>
                         </View>
                       </View>
@@ -163,9 +169,10 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                             </Text>
                             <View className='qz-match-up-item__vs-match-monopoly'>
                               <Image className='avatar'
-                                     src={matchInfo.monopolyUser.avatar ? matchInfo.monopolyUser.avatar : defaultLogo}/>
-                              <Text className={matchInfo.monopolyUser.name.length >= 7 ? 'text-small' : "text"}>
-                                {matchInfo.monopolyUser.name}
+                                     src={matchInfo.monopolyUser && matchInfo.monopolyUser.avatar ? matchInfo.monopolyUser.avatar : defaultLogo}/>
+                              <Text
+                                className={matchInfo.monopolyUser && matchInfo.monopolyUser.name && matchInfo.monopolyUser.name.length >= 7 ? 'text-small' : "text"}>
+                                {matchInfo.monopolyUser ? matchInfo.monopolyUser.name : "匿名"}
                               </Text>
                             </View>
                           </View>
@@ -212,7 +219,7 @@ class MatchUp extends Component<PageOwnProps, PageState> {
                             </View>
                             <Text
                               className="qz-match-up-item-against__score">
-                              {matchStatus && matchStatus.status == -1 ? "VS" : (matchStatus ? matchStatus.score[key] : "0-0")}
+                              {matchStatus && matchStatus.status == -1 ? "VS" : (matchStatus && matchStatus.score != null ? matchStatus.score[key] : "0-0")}
                             </Text>
                             <View className="qz-match-up-item-against__team">
                               <View className="qz-match-up-item-against__team-avatar">
