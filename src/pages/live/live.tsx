@@ -1,7 +1,7 @@
 import Taro, {getCurrentInstance} from '@tarojs/taro'
 import {Component} from 'react'
 import {Image, ScrollView, Text, Video, View} from '@tarojs/components'
-import {AtButton, AtCurtain, AtFab, AtFloatLayout, AtIcon, AtMessage, AtTabs, AtTabsPane, AtToast} from "taro-ui"
+import {AtButton, AtCurtain, AtFab, AtFloatLayout, AtIcon, AtTabs, AtTabsPane, AtToast} from "taro-ui"
 import { connect } from 'react-redux'
 import MatchUp from './components/match-up'
 import NooiceBar from './components/nooice-bar'
@@ -1790,10 +1790,10 @@ class Live extends Component<IProps, PageState> {
           if (res.statusCode === 200) {
             Taro.saveImageToPhotosAlbum({filePath: res.tempFilePath}).then(saveres => {
               console.log(saveres)
-              this.showMessage("图片保存到相册成功，快去发朋友圈吧", "success")
+              this.showMessage("图片保存到相册成功，快去发朋友圈吧", "none")
               this.setState({downLoading: false})
             }, () => {
-              this.showMessage("图片保存到相册失败", "error")
+              this.showMessage("图片保存到相册失败", "none")
               this.setState({downLoading: false, permissionShow: true})
             })
           }
@@ -1813,9 +1813,9 @@ class Live extends Component<IProps, PageState> {
     })
   }
   showMessage = (title, type) => {
-    Taro.atMessage({
-      'message': title,
-      'type': type,
+    Taro.showToast({
+      'title': title,
+      'icon': type,
     })
   }
   onPayClick = () => {
@@ -2081,10 +2081,10 @@ class Live extends Component<IProps, PageState> {
         if (res.statusCode === 200) {
           Taro.saveImageToPhotosAlbum({filePath: res.tempFilePath}).then(saveres => {
             console.log(saveres)
-            this.showMessage("图片保存到相册成功，快去发朋友圈吧", "success")
+            this.showMessage("图片保存到相册成功，快去发朋友圈吧", "none")
             this.setState({shareMomentLoading: false})
           }, () => {
-            this.showMessage("图片保存到相册失败", "error")
+            this.showMessage("图片保存到相册失败", "none")
             this.setState({shareMomentLoading: false, permissionShow: true})
           })
         }
@@ -2242,6 +2242,7 @@ class Live extends Component<IProps, PageState> {
                 onError={this.bindPlayError}
                 show-casting-button
                 autoplay
+                direction={90}
                 // enableDanmu
                 // danmuList={danmuList}
                 onTimeUpdate={this.handleVideoTime}
@@ -2555,7 +2556,6 @@ class Live extends Component<IProps, PageState> {
           />
         </AtCurtain>
         <AtToast isOpened={this.state.downLoading} text="生成中..." status="loading"/>
-        <AtMessage/>
         <ModalAlbum
           isOpened={this.state.permissionShow}
           handleConfirm={this.onPremissionSuccess}

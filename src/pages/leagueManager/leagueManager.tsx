@@ -1,7 +1,7 @@
 import Taro, {getCurrentInstance} from '@tarojs/taro'
 import {Component} from 'react'
 import {View, Image, Text} from '@tarojs/components'
-import {AtActivityIndicator, AtTabs, AtTabsPane, AtMessage, AtFloatLayout, AtFab, AtToast} from "taro-ui"
+import {AtActivityIndicator, AtTabs, AtTabsPane, AtFloatLayout, AtFab, AtToast} from "taro-ui"
 import {connect} from 'react-redux'
 import defaultLogo from '../../assets/default-logo.png'
 import cancel from '../../assets/cancel.png'
@@ -1124,7 +1124,6 @@ class LeagueManager extends Component<IProps, PageState> {
           handleCancel={this.onPhoneCancel}
           handleClose={this.onPhoneClose}
           handleError={this.onPhoneError}/>
-        <AtMessage/>
         <AtFloatLayout
           className="qz-gift-float"
           title={`礼物送给${(this.state.heatType == global.HEAT_TYPE.TEAM_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_TEAM_HEAT) && this.state.currentSupportTeam ? this.state.currentSupportTeam.name : ((this.state.heatType == global.HEAT_TYPE.PLAYER_HEAT || this.state.heatType == global.HEAT_TYPE.LEAGUE_PLAYER_HEAT) && this.state.currentSupportPlayer ? this.state.currentSupportPlayer.name : "")}`}

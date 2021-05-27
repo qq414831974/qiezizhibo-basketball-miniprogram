@@ -1,7 +1,7 @@
 import Taro from '@tarojs/taro'
 import {Component} from 'react'
 import {View, ScrollView, Image} from '@tarojs/components'
-import {AtActivityIndicator, AtAvatar, AtActionSheet, AtActionSheetItem, AtToast, AtMessage} from 'taro-ui'
+import {AtActivityIndicator, AtAvatar, AtActionSheet, AtActionSheetItem, AtToast} from 'taro-ui'
 import {connect} from 'react-redux'
 import ModalAlbum from "../../../../components/modal-album";
 
@@ -100,7 +100,7 @@ class LeagueRegulations extends Component<IProps, PageState> {
             this.showMessage("保存成功", "success")
             this.setState({downLoading: false, sheetOpen: false})
           }, () => {
-            this.showMessage("保存失败", "error")
+            this.showMessage("保存失败", "none")
             this.setState({downLoading: false, sheetOpen: false, permissionShow: true})
           })
         }
@@ -117,9 +117,9 @@ class LeagueRegulations extends Component<IProps, PageState> {
     this.setState({permissionShow: false})
   }
   showMessage = (title, type) => {
-    Taro.atMessage({
-      'message': title,
-      'type': type,
+    Taro.showToast({
+      'title': title,
+      'icon': type,
     })
   }
 
@@ -220,7 +220,6 @@ class LeagueRegulations extends Component<IProps, PageState> {
           handleConfirm={this.onPremissionSuccess}
           handleCancel={this.onPremissionCancel}
           handleClose={this.onPremissionClose}/>
-        <AtMessage/>
       </ScrollView>
     )
   }
