@@ -135,7 +135,7 @@ class LineUp extends Component<IProps, PageState> {
     return (
       <View className="qz-lineup" style={this.props.tabContainerStyle}>
         {matchInfo.againstTeams && Object.keys(matchInfo.againstTeams).length > 1 && <Picker
-          className="h-full center"
+          className="center"
           mode='selector'
           range={this.state.againstSelector}
           onChange={this.onPickerChange}

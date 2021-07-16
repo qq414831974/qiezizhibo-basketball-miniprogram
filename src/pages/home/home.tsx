@@ -94,7 +94,14 @@ class Home extends Component<IProps, PageState> {
   }
 
   $loginCallback = () => {
+    this.redirectPage();
     this.initPayConfig();
+  }
+
+  onShareAppMessage() {
+  }
+
+  onShareTimeline() {
   }
 
   componentWillMount() {
@@ -107,17 +114,40 @@ class Home extends Component<IProps, PageState> {
     configAction.getShareSentence();
     configAction.getExpInfo();
     this.initBulletin();
+  }
+
+  redirectPage = () => {
     const router = getCurrentInstance().router;
-    if (router && router.params && router.params.id && router.params.page) {
-      let url = '/pages/' + router.params.page + '/' + router.params.page + '?id=' + router.params.id;
+    if (router && router.params && router.params.page) {
+      let url = '/pages/' + router.params.page + '/' + router.params.page;
+      let count = 0;
+      for (let key in router.params) {
+        if (key != "page") {
+          if (count == 0) {
+            url = url + "?";
+          } else {
+            url = url + "&";
+          }
+          url = url + key + "=" + router.params[key];
+          count = count + 1;
+        }
+      }
       Taro.navigateTo({
         url: url,
         fail: () => {
           Taro.switchTab({url: url})
         }
       })
-    } else if (router && router.params && router.params.page) {
-      let url = '/pages/' + router.params.page + '/' + router.params.page;
+    } else if (router && router.params && router.params.scene) {
+      const scene = decodeURIComponent(router.params.scene);
+      const paramPage = this.getQueryVariable(scene, "page");
+      const paramId = this.getQueryVariable(scene, "id");
+      let url = '/pages/' + paramPage + '/' + paramPage + '?id=' + paramId;
+      if (paramPage == "reg") {
+        const l = this.getQueryVariable(scene, "l");
+        const t = this.getQueryVariable(scene, "t");
+        url = `/pages/registration/registration?leagueId=${l}&regTeamId=${t}&editable=true&isShare=true`;
+      }
       Taro.navigateTo({
         url: url,
         fail: () => {
@@ -126,6 +156,16 @@ class Home extends Component<IProps, PageState> {
       })
     }
   }
+  getQueryVariable = (query, name) => {
+    var vars = query.split("&");
+    for (var i = 0; i < vars.length; i++) {
+      var pair = vars[i].split("=");
+      if (pair[0] == name) {
+        return pair[1];
+    }
+  }
+    return (false);
+  }
 
   componentWillUnmount() {
     this.clearTimer_bulletin();
@@ -133,8 +173,8 @@ class Home extends Component<IProps, PageState> {
 
   componentDidShow() {
     // const getLocation = this.getLocation;
-    const initLocation = this.initLocation;
     // const refresh = this.refresh;
+    const initLocation = this.initLocation;
     new Request().get(api.API_CACHED_CONTROLLER, null).then((data: any) => {
       if (data.available) {
         global.CacheManager.getInstance().CACHE_ENABLED = true;
@@ -148,6 +188,23 @@ class Home extends Component<IProps, PageState> {
           configAction.setLocationConfig({city: null, province: '全国'}).then(() => {
             initLocation();
           })
+          // Taro.getSetting({
+          //   success(res) {
+          //     const userLocation = res && res.authSetting ? res.authSetting["scope.userLocation"] : null;
+          //     if (userLocation == null || (userLocation == true)) {
+          //       Taro.getLocation({
+          //         success: (location) => {
+          //           getLocation(location.latitude, location.longitude);
+          //         }, fail: () => {
+          //           Taro.showToast({title: "获取位置信息失败", icon: "none"});
+          //           refresh();
+          //         }
+          //       })
+          //     } else {
+          //       initLocation();
+          //     }
+          //   }
+          // })
         }
       })
     })
@@ -546,7 +603,7 @@ const mapStateToProps = (state) => {
     wechatConfig: state.config ? state.config.wechatConfig : {},
     locationConfig: state.config ? state.config.locationConfig : null,
     bulletinConfig: state.config ? state.config.bulletinConfig : null,
-    areaList: state.area ? state.area.areas : [],
+    areaList: state.area ? state.area.areas : {},
     shareSentence: state.config ? state.config.shareSentence : [],
     userInfo: state.user.userInfo,
     expInfo: state.config ? state.config.expInfo : [],

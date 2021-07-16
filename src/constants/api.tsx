@@ -26,9 +26,12 @@ export const API_GET_SHARE_MOMENT_PICTURE = `${system_service}/wx/ma/picture/mom
 export const API_GET_SHARE_SENTENCE = `${system_service}/sys/share/sentence`;
 export const API_GET_SHARE_PICTURE = `${system_service}/wx/ma/picture/share`;
 export const API_GET_HEAT_COMPETITION_SHARE = `${system_service}/wx/ma/picture/heat`;
+export const API_GET_REGISTRATION_LEAGUE_SHARE = `${system_service}/wx/ma/picture/registration/league`;
+export const API_GET_REGISTRATION_TEAM_SHARE = `${system_service}/wx/ma/picture/registration/team`;
 export const API_SYS_PAYMENT_CONFIG = `${system_service}/sys/config/payment`;
 export const API_SYS_FEEDBACK = `${system_service}/sys/feedback`;
 export const API_SYS_EXP = `${system_service}/sys/exp`;
+export const API_SYS_UPLOAD_AVATAR = `${system_service}/sys/upload/avatar`;
 
 //user
 export const API_LOGIN = `${auth_service}/auth`;
@@ -50,16 +53,26 @@ export const API_LEAGUE_SERIES_LEAGUE = `${basketball_service}/league`;
 export const API_LEAGUE_REPORT = `${basketball_service}/league/report`;
 export const API_LEAGUE_RANK_SETTING = `${basketball_service}/league/rank/setting`;
 export const API_LEAGUE_AD = `${basketball_service}/ad/league`;
-
+export const API_LEAGUE_REGISTRATION = `${basketball_service}/registration/league`;
+export const API_LEAGUE_REGISTRATION_TEAM = `${basketball_service}/registration/team`;
+export const API_LEAGUE_REGISTRATION_TEAM_BY_ID = (id) => `${basketball_service}/registration/team/${id}`;
+export const API_LEAGUE_REGISTRATION_PLAYER = `${basketball_service}/registration/player`;
+export const API_LEAGUE_REGISTRATION_USER = `${basketball_service}/registration/user`;
+export const API_LEAGUE_REGISTRATION_TEAM_ALL = `${basketball_service}/registration/team/all`;
+export const API_LEAGUE_REGISTRATION_TEAM_VERIFY = `${basketball_service}/registration/team/verify`;
+export const API_LEAGUE_REGISTRATION_TEAM_LAST_CHANCE = `${basketball_service}/registration/team/lastChance`;
+export const API_LEAGUE_REGISTRATION_TEAM_PRE = `${basketball_service}/registration/team/pre`;
 //match
 export const API_MATCH = (id) => `${basketball_service}/match/${id}`;
 export const API_MATCHES = `${basketball_service}/match`;
 export const API_MATCH_STATUS = `${basketball_service}/timeline/statistics`;
+export const API_STATISTICS_VERIFY = `${basketball_service}/statistics/league/verify`;
 export const API_MATCH_NOOICE = `${basketball_service}/match/nooice`;
 export const API_MATCH_COMMENT = `${chat_service}/comment`;
 export const API_MATCH_COMMENT_DANMU = `${chat_service}/comment/danmu`;
 export const API_MATCH_MEDIA = `${media_service}/media/match`;
 export const API_MATCH_ONLINE = `${basketball_service}/match/online`;
+export const API_MATCH_STATISTICS_TIMELINE = `${basketball_service}/timeline`;
 
 //team
 export const API_TEAM = (id) => `${basketball_service}/team/${id}`;
@@ -129,6 +142,8 @@ export const API_USER_LEAGUE_MEMBER = `${basketball_service}/charge/member/user`
 
 //subscribe
 export const API_SUBSCRIBE = `${system_service}/subscribe`;
+export const API_SUBSCRIBE_REGISTRATION = `${system_service}/subscribe/registration`;
+export const API_SUBSCRIBE_REGISTRATION_VERIFY = `${system_service}/subscribe/registration/verify`;
 
 //cached
 export const cached_service = `${protocol_http}qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/cached/basketball`;

@@ -122,6 +122,10 @@ class User extends Component<IProps, PageState> {
   componentDidHide() {
   }
 
+  onShareAppMessage() {}
+
+  onShareTimeline() {}
+
   onPullDownRefresh = () => {
     Taro.showLoading({title: global.LOADING_TEXT})
     this.getUserInfo()
@@ -400,6 +404,22 @@ class User extends Component<IProps, PageState> {
     }
     Taro.navigateTo({url: `../memberOrder/memberOrder`});
   }
+  onLeagueRegistrationClick = async () => {
+    const token = await getStorage('accessToken');
+    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+      this.setState({loginOpen: true})
+      return;
+    }
+    Taro.navigateTo({url: `../myRegistration/myRegistration`});
+  }
+  onLeagueStatisticsClick = async () => {
+    const token = await getStorage('accessToken');
+    if (token == null || token == '' || this.props.userInfo.userNo == null || this.props.userInfo.userNo == '') {
+      this.setState({loginOpen: true})
+      return;
+    }
+    Taro.navigateTo({url: `../leagueStatistics/leagueStatistics`});
+  }
   getUserExpProgress = (userExp) => {
     const {expInfo} = this.props
     const userExpInfo = getExpInfoByExpValue(expInfo, userExp.exp)
@@ -501,6 +521,20 @@ class User extends Component<IProps, PageState> {
             <View className='list_title'>
               <AtIcon className='list-title-icon' value='sketch' size='18' color='#333'/>
               我的联赛会员
+            </View>
+            <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
+          </Button>
+          <Button onClick={this.onLeagueRegistrationClick} className='list button-list'>
+            <View className='list_title'>
+              <AtIcon className='list-title-icon' value='calendar' size='18' color='#333'/>
+              我报名的球队
+            </View>
+            <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
+          </Button>
+          <Button onClick={this.onLeagueStatisticsClick} className='list button-list'>
+            <View className='list_title'>
+              <AtIcon className='list-title-icon' value='edit' size='18' color='#333'/>
+              我是记录员
             </View>
             <AtIcon value='chevron-right' size='18' color='#7f7f7f'/>
           </Button>

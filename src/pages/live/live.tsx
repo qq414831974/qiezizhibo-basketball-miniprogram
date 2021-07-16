@@ -2,7 +2,7 @@ import Taro, {getCurrentInstance} from '@tarojs/taro'
 import {Component} from 'react'
 import {Image, ScrollView, Text, Video, View} from '@tarojs/components'
 import {AtButton, AtCurtain, AtFab, AtFloatLayout, AtIcon, AtTabs, AtTabsPane, AtToast} from "taro-ui"
-import { connect } from 'react-redux'
+import {connect} from 'react-redux'
 import MatchUp from './components/match-up'
 import NooiceBar from './components/nooice-bar'
 import GiftNotify from '../../components/gift-notify'
@@ -70,6 +70,7 @@ import LevelUpModal from "../../components/modal-level-up";
 import NavBar from "../../components/nav-bar";
 import LeagueMember from "../../components/league-member";
 import RectFab from "../../components/fab-rect";
+import {crown, gift_rank, heat_reward} from "../../utils/assets";
 
 type Bulletin = {
   id: number,
@@ -189,6 +190,7 @@ type PageState = {
   currentLevel: number;
   leagueMemberRule: any;
   leagueMemberOpen: boolean;
+  refreshStatisticsFunc: any;
 }
 
 type IProps = PageStateProps & PageDispatchProps & PageOwnProps
@@ -208,7 +210,7 @@ enum LiveStatus {
 
 @withShare({})
 class Live extends Component<IProps, PageState> {
-  navRef = null;
+  navRef: any = null;
   socketTask: Taro.SocketTask | null
   videoContext: Taro.VideoContext | null
   animElemIds: any = {};
@@ -306,6 +308,7 @@ class Live extends Component<IProps, PageState> {
       currentLevel: 0,
       leagueMemberRule: null,
       leagueMemberOpen: false,
+      refreshStatisticsFunc: null,
     }
   }
 
@@ -346,13 +349,19 @@ class Live extends Component<IProps, PageState> {
               times: 1,
             }).then((result) => {
               if (result) {
-                payAction.getGiftList({matchId: this.getParamId()});
+                payAction.getGiftList();
               }
             })
           }
         });
       }
     }
+  }
+
+  onShareAppMessage() {
+  }
+
+  onShareTimeline() {
   }
 
   componentWillMount() {
@@ -399,7 +408,8 @@ class Live extends Component<IProps, PageState> {
         this.getUserChargeInfo(data, true);
         this.getSharePicture(data);
         this.enterTime = formatTimeSecond(new Date());
-        if (data.type.includes(MATCH_TYPE.chattingRoom)) {
+
+        if (data.type && data.type.includes(MATCH_TYPE.chattingRoom)) {
           this.getCommentList(data.id);
         }
         this.initHeatCompetition(data);
@@ -462,7 +472,7 @@ class Live extends Component<IProps, PageState> {
           heatStartTime = this.getMatchHeatStartTime(data, match);
           heatEndTime = this.getMatchHeatEndTime(data, match);
         }
-        payAction.getGiftList({matchId: id});
+        payAction.getGiftList();
         this.setState({
           heatRule: data,
           heatType: data.type,
@@ -813,7 +823,10 @@ class Live extends Component<IProps, PageState> {
     return matchAction.getMatchInfo({id: id, userNo: userNo})
   }
   getMatchStatus = (id) => {
-    return matchAction.getMatchStatus({matchId: id})
+    return matchAction.getMatchStatus({matchId: id}).then((data) => {
+      this.state.refreshStatisticsFunc && this.state.refreshStatisticsFunc();
+      return data;
+    });
   }
   getLiveMediaInfo = (id) => {
     return liveAction.getLiveMediaList(id)
@@ -1153,18 +1166,18 @@ class Live extends Component<IProps, PageState> {
       // const commentList: Array<any> = this.getCommentsList(this.props.commentList.records.concat(this.state.broadcastList));
       const commentList: Array<any> = this.getCommentsList(this.props.commentList.records);
       setTimeout(() => {
-      if (commentList && commentList.length > 0) {
-        this.setState({
-          comments: commentList,
-          chatLoading: false,
-          commentIntoView: `message-${commentList[commentList.length - 1].id}`
-        })
-      } else {
-        this.setState({
-          comments: commentList,
-          chatLoading: false,
-        })
-      }
+        if (commentList && commentList.length > 0) {
+          this.setState({
+            comments: commentList,
+            chatLoading: false,
+            commentIntoView: `message-${commentList[commentList.length - 1].id}`
+          })
+        } else {
+          this.setState({
+            comments: commentList,
+            chatLoading: false,
+          })
+        }
       }, 2000)
     })
   }
@@ -1518,7 +1531,7 @@ class Live extends Component<IProps, PageState> {
     this.setState({giftOpen: false})
     if (orderId == GIFT_TYPE.FREE) {
       this.getParamId() && this.getTeamHeatInfo(this.getParamId(), null);
-      this.getParamId() && payAction.getGiftList({matchId: this.getParamId()});
+      this.getParamId() && payAction.getGiftList();
       this.state.playerHeatRefreshFunc && this.state.playerHeatRefreshFunc();
       this.state.leagueTeamHeatRefreshFunc && this.state.leagueTeamHeatRefreshFunc();
       this.getUserChargeInfo(this.props.match, false);
@@ -1793,7 +1806,7 @@ class Live extends Component<IProps, PageState> {
               this.showMessage("图片保存到相册成功，快去发朋友圈吧", "none")
               this.setState({downLoading: false})
             }, () => {
-              this.showMessage("图片保存到相册失败", "none")
+              this.showMessage("图片保存到相册失败", "error")
               this.setState({downLoading: false, permissionShow: true})
             })
           }
@@ -1843,7 +1856,7 @@ class Live extends Component<IProps, PageState> {
       tabs[TABS_TYPE.heatLeagueTeam] = tabIndex;
       tabIndex = tabIndex + 1;
     }
-    tabList.push({title: this.state.heatType == HEAT_TYPE.TEAM_HEAT ? "有奖PK" : "赛况"})
+    tabList.push({title: this.state.heatType == HEAT_TYPE.TEAM_HEAT ? "有奖PK" : (match && match.type && match.type.indexOf(MATCH_TYPE.timeLine) != -1 ? "聊天" : "赛况")})
     tabs[TABS_TYPE.matchUp] = tabIndex;
     tabIndex = tabIndex + 1;
     // //开启热度比拼
@@ -2084,7 +2097,7 @@ class Live extends Component<IProps, PageState> {
             this.showMessage("图片保存到相册成功，快去发朋友圈吧", "none")
             this.setState({shareMomentLoading: false})
           }, () => {
-            this.showMessage("图片保存到相册失败", "none")
+            this.showMessage("图片保存到相册失败", "error")
             this.setState({shareMomentLoading: false, permissionShow: true})
           })
         }
@@ -2194,6 +2207,9 @@ class Live extends Component<IProps, PageState> {
         return;
       }
     }
+  }
+  setRefreshStatisticsFunc = (func) => {
+    this.setState({refreshStatisticsFunc: func})
   }
 
   render() {
@@ -2490,7 +2506,10 @@ class Live extends Component<IProps, PageState> {
                     :
                     (
                       <View>
-                        <Statistics statistics={this.props.matchStatus.againstStatistics} matchInfo={this.props.match}/>
+                        <Statistics
+                          statistics={this.props.matchStatus ? this.props.matchStatus.againstStatistics : {}}
+                          refreshFunc={this.setRefreshStatisticsFunc}
+                          matchInfo={this.props.match}/>
                       </View>
                     )
                   }
@@ -2549,11 +2568,11 @@ class Live extends Component<IProps, PageState> {
           isOpened={this.state.curtainShow}
           onClose={this.onCurtainClose}
         >
-          <Image
+          {this.state.curtainShow ? <Image
             mode="widthFix"
             src={this.state.curtain ? this.state.curtain.content : ""}
             onClick={this.handleCurtainClick}
-          />
+          /> : null}
         </AtCurtain>
         <AtToast isOpened={this.state.downLoading} text="生成中..." status="loading"/>
         <ModalAlbum
@@ -2625,13 +2644,13 @@ class Live extends Component<IProps, PageState> {
             <View className="qz-live-fab qz-live-fab-square qz-live-fab-giftrank">
               <AtFab onClick={this.onGiftRankClick}>
                 <Image className="qz-live-fab-image"
-                       src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/gift_rank.png"/>
+                       src={gift_rank}/>
               </AtFab>
             </View>
             <View className="qz-live-fab qz-live-fab-square qz-live-fab-heatreward">
               <AtFab onClick={this.onHeatRewardClick}>
                 <Image className="qz-live-fab-image"
-                       src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/heat_reward.png"/>
+                       src={heat_reward}/>
               </AtFab>
             </View>
           </View>
@@ -2644,7 +2663,7 @@ class Live extends Component<IProps, PageState> {
             background="linear-gradient(90deg,#f8e2c4,#f3bb6c);"
             top="30%"
           >
-            <Image src="https://qiezizhibo-1300664818.cos.ap-shanghai.myqcloud.com/images/202009/crown.png"/>
+            <Image src={crown}/>
             <Text style={{color: "#754e19"}}>联赛会员，比赛随心看</Text>
           </RectFab>
           : null}

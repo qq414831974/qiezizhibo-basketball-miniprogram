@@ -227,7 +227,7 @@ class HeatPlayer extends Component<IProps, PageState> {
     this.nextPage();
   }
 
-  onPullDownRefresh = ()=> {
+  onPullDownRefresh = () => {
     this.setState({pulldownRefresh: true})
     Taro.showLoading({title: global.LOADING_TEXT})
     this.refresh();
@@ -407,6 +407,7 @@ class HeatPlayer extends Component<IProps, PageState> {
                     <View className="qz-heat-player__grid-item-shirtNum">
                       <Text>{data.sequence ? data.sequence : "0"}号</Text>
                     </View> : null}
+                  {currentPlayerHeat && currentPlayerHeat.id == data.id ?
                   <View
                     className={`qz-heat-player__grid-item-popup ${currentPlayerHeat && currentPlayerHeat.id == data.id ? "qz-heat-player__grid-item-popup-active" : ""}`}>
                     <RoundButton
@@ -422,12 +423,13 @@ class HeatPlayer extends Component<IProps, PageState> {
                       img={moment}
                       onClick={this.handleShareMoment}/>
                     <RoundButton
-                      animation
+                        // animation
                       margin="0 5px"
                       size={25}
                       img={flame}
                       onClick={this.handleSupport}/>
-                  </View>
+                    </View> : null
+                  }
                 </View>
               )
             )}

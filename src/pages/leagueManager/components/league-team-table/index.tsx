@@ -4,6 +4,7 @@ import {AtActivityIndicator} from 'taro-ui'
 
 import './index.scss'
 import logo from "../../../../assets/default-logo.png";
+import {isInteger} from "../../../../utils/utils";
 
 type PageStateProps = {}
 
@@ -30,8 +31,7 @@ class LeagueTeamTable extends Component<IProps, PageState> {
 
   constructor(props) {
     super(props)
-    this.state = {
-    }
+    this.state = {}
   }
 
   componentWillMount() {
@@ -59,6 +59,16 @@ class LeagueTeamTable extends Component<IProps, PageState> {
       }
     }
     return list;
+  }
+  getRate = (teamInfo) => {
+    let rate: any = 0;
+    if (teamInfo && teamInfo.matchTotal) {
+      rate = teamInfo.matchWin * 100 / teamInfo.matchTotal
+      if (!isInteger(rate)) {
+        rate = rate.toFixed(1);
+      }
+    }
+    return `${rate}%`
   }
 
   render() {
@@ -109,7 +119,8 @@ class LeagueTeamTable extends Component<IProps, PageState> {
                         <View className='qz-league-team-table__list-item__point'>{teamInfo.matchTotal}</View>
                         <View className='qz-league-team-table__list-item__point'>{teamInfo.matchWin}</View>
                         <View className='qz-league-team-table__list-item__point'>{teamInfo.matchLost}</View>
-                        <View className='qz-league-team-table__list-item__point-big'>{teamInfo.matchWin * 100 / teamInfo.matchTotal}%</View>
+                        <View
+                          className='qz-league-team-table__list-item__point-big'>{teamInfo.matchTotal ? this.getRate(teamInfo) : "0"}</View>
                         <View className='qz-league-team-table__list-item__point-big'>
                           {`${teamInfo.totalGoal}/${teamInfo.totalGoalLost}`}
                         </View>

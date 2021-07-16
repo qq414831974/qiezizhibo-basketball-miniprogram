@@ -68,11 +68,12 @@ class MatchItem extends Component<IProps, PageState> {
     // matchInfo.isBetEnable = true
     const againstTeam = matchInfo.againstTeams != null && Object.keys(matchInfo.againstTeams).length == 1 ? matchInfo.againstTeams[Object.keys(matchInfo.againstTeams)[0]] : null;
     return (
-      <View className={`qz-match-item ${matchInfo.isBetEnable && showBet ? "qz-match-item-big" : ""} ${className}`}
-            onClick={this.onItemClick}>
+      <View
+        className={`qz-match-item ${payEnabled && matchInfo.isBetEnable && showBet ? "qz-match-item-big" : ""} ${className}`}
+        onClick={this.onItemClick}>
         {matchInfo.againstTeams != null && Object.keys(matchInfo.againstTeams).length == 1 ?
           (<View
-            className={`qz-match-item-content ${matchInfo.isBetEnable && showBet ? "qz-match-item-content-big" : ""}`}>
+            className={`qz-match-item-content ${payEnabled && matchInfo.isBetEnable && showBet ? "qz-match-item-content-big" : ""}`}>
             {((matchInfo.status && matchInfo.status.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status && matchInfo.status.status < 21 && matchInfo.isLiveCharge)) && payEnabled && showCharge ?
               <View className="qz-match-item__charge">
                 {matchInfo.isMonopoly ?
@@ -88,7 +89,7 @@ class MatchItem extends Component<IProps, PageState> {
               </View>
               : null
             }
-            {matchInfo.isBetEnable && showBet ?
+            {payEnabled && matchInfo.isBetEnable && showBet ?
               <View className="qz-match-item-top-skewed" onClick={this.onBetClick}>
                 <View className="qz-match-item-top-skewed-center-text">
                   比分竞猜
@@ -153,7 +154,7 @@ class MatchItem extends Component<IProps, PageState> {
           : (
             matchInfo.againstTeams != null && Object.keys(matchInfo.againstTeams).length > 1 ?
               (<View
-                className={`qz-match-item-content ${matchInfo.isBetEnable && showBet ? "qz-match-item-content-big" : ""}`}>
+                className={`qz-match-item-content ${payEnabled && matchInfo.isBetEnable && showBet ? "qz-match-item-content-big" : ""}`}>
                 {((matchInfo.status && matchInfo.status.status == 21 && matchInfo.isRecordCharge) || (matchInfo.status && matchInfo.status.status < 21 && matchInfo.isLiveCharge)) && payEnabled && showCharge ?
                   <View className="qz-match-item__charge">
                     {matchInfo.isMonopoly ?
@@ -169,7 +170,7 @@ class MatchItem extends Component<IProps, PageState> {
                   </View>
                   : null
                 }
-                {matchInfo.isBetEnable && showBet ?
+                {payEnabled && matchInfo.isBetEnable && showBet ?
                   <View className="qz-match-item-top-skewed" onClick={this.onBetClick}>
                     <View className="qz-match-item-top-skewed-center-text">
                       比分竞猜

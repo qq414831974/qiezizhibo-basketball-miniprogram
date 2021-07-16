@@ -131,7 +131,9 @@ export const SUBSCRIBE_TEMPLATES = {
   MATCH_START: "_AyyJaoFIIfm_voTzPQfC_KXB4dfS_8K9iZjFO9tpww",
   HEAT_SURPASS: "4jmTnrarVi0UdvfNPiqmJ6YUD0ehPH44KtKw7XmcTlk",
   HEAT_COUNTDOWN: "lZCEme84RpK6JNQdc7LlrfHcrngPbfpSBabozSb3pio",
-  BET_SUCCESS: "gxSzekpYrOhJDvMvBYBGMhiEMxOTtjqZLwYXjxXVGLI"
+  BET_SUCCESS: "gxSzekpYrOhJDvMvBYBGMhiEMxOTtjqZLwYXjxXVGLI",
+  REGISTRATION_MESSAGE: "woLXqsaUaTh949RSudmCUIZNUUAhttKXNktSwroF5RM",
+  REGISTRATION_VERIFY: "WevsTTcyHOramkWFqFUO2UIav6NSCmDgKQmiJVQ8T2Q",
 }
 export const PAY_TYPE = {
   ONLINE: 0,
@@ -167,3 +169,6 @@ export const LEVEL_COLOR = {
   3: "#ff4136",
   4: "#B10DC9",
 }
+
+export const TOUPIAO_APPID = "wxbabc811f507ba6aa";
+
