@@ -21,6 +21,7 @@ import ModalLocation from "../../components/modal-location";
 import LocationSelecter from "./components/location-selecter";
 import areaAction from "../../actions/area";
 import NavBar from "../../components/nav-bar";
+// import withOfficalAccount from "../../utils/withOfficialAccount";
 
 type PageStateProps = {
   userInfo: {
@@ -54,6 +55,7 @@ interface User {
   props: IProps;
 }
 
+// @withOfficalAccount()
 @withShare({
   title: '绝杀时刻',
   imageUrl: logo,

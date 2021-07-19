@@ -10,6 +10,7 @@ import SearchLeague from "./components/search-league";
 import SearchMatch from "./components/search-match";
 import withShare from "../../utils/withShare";
 import NavBar from "../../components/nav-bar";
+// import withOfficalAccount from "../../utils/withOfficialAccount";
 
 // import {getStorage, hasLogin} from "../../utils/utils";
 
@@ -39,6 +40,7 @@ interface Search {
   props: IProps;
 }
 
+// @withOfficalAccount()
 @withShare({})
 class Search extends Component<IProps, PageState> {
   static defaultProps = {}
