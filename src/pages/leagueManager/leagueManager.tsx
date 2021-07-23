@@ -10,6 +10,7 @@ import './leagueManager.scss'
 import leagueAction from "../../actions/league";
 import LeagueManagerMatches from "./components/league-manager-matches"
 import LeagueTeamTable from "./components/league-team-table"
+import LeaguePlayerTable from "./components/league-player-table";
 import LeagueRegulations from "./components/league-regulations";
 import withShare from "../../utils/withShare";
 import * as global from "../../constants/global";
@@ -45,6 +46,7 @@ import {bet_rank, crown, gift_rank, heat_reward, vip_card} from "../../utils/ass
 
 type PageStateProps = {
   leagueTeams: any;
+  leaguePlayers: any;
   locationConfig: { city: string, province: string }
   shareSentence: any;
   userInfo: any;
@@ -878,6 +880,7 @@ class LeagueManager extends Component<IProps, PageState> {
   getLeagueList = (id) => {
     Promise.all([
       leagueAction.getLeagueTeam({leagueId: id}),
+      leagueAction.getLeaguePlayer({leagueId: id}),
       leagueAction.getLeagueReport(id),
     ]).then(() => {
       this.setState({loading: false})
@@ -930,6 +933,12 @@ class LeagueManager extends Component<IProps, PageState> {
     if (leagueRankSetting.showLeagueTeam) {
       tabList.push({title: '积分榜'})
       tabs[global.LEAGUE_TABS_TYPE.leagueTeam] = tabIndex;
+      tabIndex = tabIndex + 1;
+    }
+    //射手榜
+    if (leagueRankSetting.showLeaguePlayer) {
+      tabList.push({title: '球员榜'})
+      tabs[global.LEAGUE_TABS_TYPE.leaguePlayer] = tabIndex;
       tabIndex = tabIndex + 1;
     }
     const tabKey = Object.keys(tabs).join(",");
@@ -1058,7 +1067,7 @@ class LeagueManager extends Component<IProps, PageState> {
   }
 
   render() {
-    const {leagueTeams} = this.props
+    const {leaguePlayers, leagueTeams} = this.props
     const {league, leagueRankSetting} = this.state
     let {tabList, tabs, tabKey} = this.getTabsList();
 
@@ -1165,6 +1174,15 @@ class LeagueManager extends Component<IProps, PageState> {
                 loading={this.state.tabloading}
                 visible={this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leagueTeam]}
                 teamGroup={leagueTeams}/>
+            </AtTabsPane>}
+            {leagueRankSetting.showLeaguePlayer &&
+            <AtTabsPane current={this.state.currentTab} index={tabs[global.LEAGUE_TABS_TYPE.leaguePlayer]}>
+              <LeaguePlayerTable
+                tabScrollStyle={{height: `calc(100vh - ${this.navRef ? this.navRef.state.configStyle.navHeight : 0}px - 35px - 44px)`}}
+                leagueMatch={league}
+                loading={this.state.tabloading}
+                visible={this.state.currentTab == tabs[global.LEAGUE_TABS_TYPE.leaguePlayer]}
+                playerList={leaguePlayers}/>
             </AtTabsPane>}
           </AtTabs>}
         </View>
@@ -1299,6 +1317,7 @@ const mapStateToProps = (state) => {
   return {
     deposit: state.deposit.depositInfo ? state.deposit.depositInfo.deposit : 0,
     userInfo: state.user.userInfo,
+    leaguePlayers: state.league.leaguePlayers,
     leagueTeams: state.league.leagueTeams,
     locationConfig: state.config.locationConfig,
     shareSentence: state.config ? state.config.shareSentence : [],

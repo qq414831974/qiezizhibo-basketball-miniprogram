@@ -12,7 +12,7 @@
 }
 
 @mixin hairline-base(
-  $color: tint(#C5D9E8, 30%),
+  $color: tint(#DDD, 30%),
   $style: solid
 ) {
   @include hairline-common();
@@ -26,7 +26,7 @@
 }
 
 @mixin hairline-surround(
-  $color: tint(#C5D9E8, 30%),
+  $color: tint(#DDD, 30%),
   $style: solid,
   $width: 1PX
 ) {
@@ -40,7 +40,7 @@
 }
 
 @mixin hairline-top(
-  $color: tint(#C5D9E8, 30%),
+  $color: tint(#DDD, 30%),
   $style: solid,
   $width: 1PX
 ) {
@@ -54,7 +54,7 @@
 }
 
 @mixin hairline-bottom(
-  $color: tint(#C5D9E8, 30%),
+  $color: tint(#DDD, 30%),
   $style: solid,
   $width: 1PX
 ) {
@@ -68,7 +68,7 @@
 }
 
 @mixin hairline-left(
-  $color: tint(#C5D9E8, 30%),
+  $color: tint(#DDD, 30%),
   $style: solid,
   $width: 1PX
 ) {
@@ -82,7 +82,7 @@
 }
 
 @mixin hairline-right(
-  $color: tint(#C5D9E8, 30%),
+  $color: tint(#DDD, 30%),
   $style: solid,
   $width: 1PX
 ) {
@@ -96,7 +96,7 @@
 }
 
 @mixin hairline-top-bottom(
-  $color: tint(#C5D9E8, 30%),
+  $color: tint(#DDD, 30%),
   $style: solid,
   $width: 1PX
 ) {
@@ -111,7 +111,7 @@
 }
 
 @mixin hairline-bottom-relative(
-  $color: tint(#C5D9E8, 30%),
+  $color: tint(#DDD, 30%),
   $style: solid,
   $width: 1PX,
   $left: 0
@@ -131,7 +131,7 @@
 }
 
 @mixin hairline-top-relative(
-  $color: tint(#C5D9E8, 30%),
+  $color: tint(#DDD, 30%),
   $style: solid,
   $width: 1PX,
   $left: 0
@@ -151,7 +151,7 @@
 }
 
 @mixin hairline-left-relative(
-  $color: tint(#C5D9E8, 30%),
+  $color: tint(#DDD, 30%),
   $style: solid,
   $width: 1PX,
   $top: 0
@@ -171,7 +171,7 @@
 }
 
 @mixin hairline-right-relative(
-  $color: tint(#C5D9E8, 30%),
+  $color: tint(#DDD, 30%),
   $style: solid,
   $width: 1PX,
   $top: 0
