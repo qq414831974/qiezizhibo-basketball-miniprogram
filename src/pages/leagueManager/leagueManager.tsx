@@ -784,6 +784,10 @@ class LeagueManager extends Component<IProps, PageState> {
       this.showAuth();
       return;
     }
+    if (this.props.userInfo && this.props.userInfo.phone == null) {
+      this.setState({phoneOpen: true})
+      return
+    }
     this.setState({giftOpen: true})
   }
   hideGiftPanel = () => {
