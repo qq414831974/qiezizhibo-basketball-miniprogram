@@ -29,6 +29,8 @@ export default {
     'pages/leagueSeriesStatistics/leagueSeriesStatistics',
     'pages/leagueMatchStatistics/leagueMatchStatistics',
     'pages/matchStatistics/matchStatistics',
+    'pages/leagueMemberVerify/leagueMemberVerify',
+    'pages/personVerify/personVerify',
   ],
   window: {
     backgroundTextStyle: 'light',
