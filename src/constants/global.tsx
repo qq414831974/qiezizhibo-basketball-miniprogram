@@ -149,7 +149,11 @@ export const BET_TYPE = {
   FREE: 0,
   CHARGE: 1,
 }
-
+export const CASH_OUT_VERIFY_STATUS = {
+  VERIFY_FAILED: -1,
+  NOT_VERIFY: 0,
+  VERIFY_SUCCESS: 1,
+}
 export class CacheManager {
   static instance: CacheManager;
   CACHE_ENABLED: boolean;
@@ -171,4 +175,3 @@ export const LEVEL_COLOR = {
 }
 
 export const TOUPIAO_APPID = "wxbabc811f507ba6aa";
-
