@@ -270,7 +270,7 @@
 
         .background {
           padding: $font-size-xs * 0.2;
-          height: $font-size-xs * 2;
+          min-height: $font-size-xs * 2;
           border-radius: $font-size-xs;
           box-sizing: border-box;
           display: flex;

@@ -125,6 +125,7 @@ class MatchItem extends Component<IProps, PageState> {
                     <View
                       className={`background ${matchInfo.activityId == null || !matchInfo.available ? "" : eventType[matchInfo.status.status].color}`}>
                       <Text className={matchInfo.activityId == null || !matchInfo.available ? "text-disabled" : "text"}>
+                        {matchInfo.statisticsModeAvailable ? "数据统计-" : ""}
                         {eventType[matchInfo.status.status].text}
                       </Text>
                       <View
@@ -203,6 +204,7 @@ class MatchItem extends Component<IProps, PageState> {
                           className={`background ${matchInfo.activityId == null || !matchInfo.available ? "" : eventType[matchInfo.status.status].color}`}>
                           <Text
                             className={matchInfo.activityId == null || !matchInfo.available ? "text-disabled" : "text"}>
+                            {matchInfo.statisticsModeAvailable ? "数据统计-" : ""}
                             {eventType[matchInfo.status.status].text}
                           </Text>
                           <View
